@@ -14,6 +14,7 @@ dsp: binfolder
 
 aptdec: binfolder dsp wav
 	@echo Compiling aptdec
+	gcc aptdec.c bin/dsp.o bin/wav.o -lm -o bin/aptdec
 
 clean:
 	rm -fr bin

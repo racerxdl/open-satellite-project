@@ -29,16 +29,19 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+#ifndef _WAV_H_
+#define _WAV_H_
+
 #define APT_SAMPLE_RATE 11025
 
 #define RIFF_CHUNK_ID_SIZE 4
-const char RIFF_CHUNK_ID[RIFF_CHUNK_ID_SIZE] = "WAVE";
+extern const char RIFF_CHUNK_ID[RIFF_CHUNK_ID_SIZE];
 
 #define FORMAT_CHUNK_ID_SIZE 3
-const char FORMAT_CHUNK_ID[FORMAT_CHUNK_ID_SIZE] = "fmt";
+extern const char FORMAT_CHUNK_ID[FORMAT_CHUNK_ID_SIZE];
 
 #define DATA_CHUNK_ID_SIZE 4
-const char DATA_CHUNK_ID[DATA_CHUNK_ID_SIZE] = "data";
+extern const char DATA_CHUNK_ID[DATA_CHUNK_ID_SIZE];
 
 typedef struct {
   char chunkId[4];
@@ -89,3 +92,5 @@ inline float getNextFloatSample(wave_t *wave) { return getNextSample(wave) / 327
 inline uint8_t checkAPTCompatible(wave_t *wave) { return wave->wavefile.format.sampleRate == APT_SAMPLE_RATE; };
 inline void rectified(wave_t *wave, uint8_t rectified) { wave->rectified = rectified; };
 inline void setPosition(wave_t *wave, uint32_t position) { wave->currentPosition = position; };
+
+#endif

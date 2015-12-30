@@ -25,6 +25,9 @@
 
 #include "wav.h"
 
+const char RIFF_CHUNK_ID[RIFF_CHUNK_ID_SIZE] = "WAVE";
+const char FORMAT_CHUNK_ID[FORMAT_CHUNK_ID_SIZE] = "fmt";
+const char DATA_CHUNK_ID[DATA_CHUNK_ID_SIZE] = "data";
 
 void loadWave(const char *filename, wave_t *wave) {
   wave->file = fopen(filename, "rb");
