@@ -51,8 +51,8 @@ typedef struct syncPosition {
   float score;
 } syncPosition_t;
 
-void fir(float *coeffs, int coeffsLen, float *input, int inputLen);
-int resample(float *input, int inputSize, int interpolation, int decimation, float *coeffs, int coeffsLen, float **output);
+void fir(const float *coeffs, const int coeffsLen, float *input, int inputLen);
+int resample(float *input, int inputSize, int interpolation, int decimation, const float *coeffs, const int coeffsLen, float **output);
 void normalize(float *input, int inputSize);
 float mean(float *input, int inputSize);
 syncPosition_t *getSync(int start, int range, float dataMean, float *data, int dataLen);

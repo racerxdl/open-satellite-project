@@ -26,8 +26,61 @@
 #include "lib/dsp.h"
 #include "lib/wav.h"
 
+#define BUFF_SIZE 11025
 
- int main(char *argc, int argv) {
+void printHelp() {
+  printf("Usage: \n");
+  printf("./aptdec data.wav\n");
+}
+
+
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    printHelp();
+    return 1;
+  }
+
+  wave_t wav;
+  loadWave(argv[1], &wav);
+
+  if (!checkAPTCompatible(&wav)) {
+    printf("WAV not compatible to APT Decoding. It should be 11025Hz Sample Rate and this file is %u\n", wav.wavefile.format.sampleRate);
+    return 1;
+  }
+
+  rectified(&wav, 1);
+
+  FILE *out = fopen("out.bin", "wb");
+  uint8_t lineData[2080];
+  float buffer[BUFF_SIZE];
+  float *resampledLine;
+  int resampledLength;
+  int lineCount = 0;
+  int buffPos = 0;
+  int read = 0;
+
+  while(1) {
+    int read = getNextFloatBufferSamples(&wav, buffer, BUFF_SIZE);
+    if (read == 0)
+      break;
+    fir(lowPass, lowPassLength, buffer, BUFF_SIZE);
+    normalize(buffer, BUFF_SIZE);
+    resampledLength = resample(buffer, BUFF_SIZE, 4160, 11025, lowPass, lowPassLength, &resampledLine);
+    for(int i=0;i<resampledLength;i++) {
+      if (buffPos == 2080) {
+        fwrite(lineData, 2080, 1, out);
+        buffPos = 0;
+        lineCount++;
+      }
+      lineData[buffPos] = (uint8_t)(resampledLine[i] * 256);
+      buffPos++;
+    }
+  }
+
+  printf("Read %u lines.\n", lineCount);
+
+  fclose(out);
+  closeWave(&wav);
 
   return 0;
- }
+}

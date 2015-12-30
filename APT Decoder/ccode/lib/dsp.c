@@ -72,7 +72,7 @@ const float lowPass[] = {
 const int lowPassLength = 51;
 
 
-void fir(float *coeffs, int coeffsLen, float *input, int inputLen) {
+void fir(const float *coeffs, const int coeffsLen, float *input, int inputLen) {
   for (int i = 0; i < inputLen; i++) {
     float acc = 0;
     for ( int x = 0; x < coeffsLen; x++ ) {
@@ -84,20 +84,20 @@ void fir(float *coeffs, int coeffsLen, float *input, int inputLen) {
   }
 }
 
-int resample(float *input, int inputSize, int interpolation, int decimation, float *coeffs, int coeffsLen, float **output) {
-  float factor = interpolation / decimation;
+int resample(float *input, int inputSize, int interpolation, int decimation, const float *coeffs, const int coeffsLen, float **output) {
+  float factor = (float)interpolation / decimation;
   int outputLength = factor * inputSize;
+  float nInput[inputSize];
 
   *output = malloc( outputLength * sizeof(float) );
 
-  float nInput[inputSize];
   memcpy ( nInput, input, inputSize * sizeof(float) );
 
   fir(coeffs, coeffsLen, nInput, inputSize);
 
   for (int i = 0; i < outputLength; i++) {
     int idx = floor(i / factor);
-    *output[i] = nInput[idx];
+    (*output)[i] = nInput[idx];
   }
 
   return outputLength;

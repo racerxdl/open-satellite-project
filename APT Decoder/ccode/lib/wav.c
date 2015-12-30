@@ -25,7 +25,7 @@
 
 #include "wav.h"
 
-const char RIFF_CHUNK_ID[RIFF_CHUNK_ID_SIZE] = "WAVE";
+const char RIFF_CHUNK_ID[RIFF_CHUNK_ID_SIZE] = "RIFF";
 const char FORMAT_CHUNK_ID[FORMAT_CHUNK_ID_SIZE] = "fmt";
 const char DATA_CHUNK_ID[DATA_CHUNK_ID_SIZE] = "data";
 
@@ -33,7 +33,7 @@ void loadWave(const char *filename, wave_t *wave) {
   wave->file = fopen(filename, "rb");
   int count = fread(&wave->wavefile, WAVEFILE_SIZE, 1, wave->file);
 
-  if (count != WAVEFILE_SIZE) {
+  if (count != 1) {
     printf("Error reading file %s\n", filename);
     exit(1);
   }
@@ -80,7 +80,7 @@ int getNextBufferSamples(wave_t *wave, int16_t *buffer, int bufferSize) {
   fseek(wave->file, wave->currentPosition * sizeof(int16_t) + dataPosition, SEEK_SET);
 
   int count = fread(buffer, sizeof(int16_t), bufferSize, wave->file);
-  wave->currentPosition += count / sizeof(int16_t);
+  wave->currentPosition += count;
 
   if (wave->rectified) {
     for (int i = 0; i < count; i++) {
@@ -93,5 +93,11 @@ int getNextBufferSamples(wave_t *wave, int16_t *buffer, int bufferSize) {
 
 void closeWave(wave_t *wave) {
   fclose(wave->file);
-  free(wave);
+  //free(wave);
 }
+
+
+float getNextFloatSample(wave_t *wave) { return getNextSample(wave) / 32768.0f; }
+uint8_t checkAPTCompatible(wave_t *wave) { return wave->wavefile.format.sampleRate == APT_SAMPLE_RATE; };
+void rectified(wave_t *wave, uint8_t rectified) { wave->rectified = rectified; };
+void setPosition(wave_t *wave, uint32_t position) { wave->currentPosition = position; };

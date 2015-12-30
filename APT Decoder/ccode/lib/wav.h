@@ -88,9 +88,9 @@ int getNextBufferSamples(wave_t *wave, int16_t *buffer, int bufferSize);
 void closeWave(wave_t *wave);
 
 
-inline float getNextFloatSample(wave_t *wave) { return getNextSample(wave) / 32768.0f; }
-inline uint8_t checkAPTCompatible(wave_t *wave) { return wave->wavefile.format.sampleRate == APT_SAMPLE_RATE; };
-inline void rectified(wave_t *wave, uint8_t rectified) { wave->rectified = rectified; };
-inline void setPosition(wave_t *wave, uint32_t position) { wave->currentPosition = position; };
+extern float getNextFloatSample(wave_t *wave);
+extern uint8_t checkAPTCompatible(wave_t *wave);
+extern void rectified(wave_t *wave, uint8_t rectified);
+extern void setPosition(wave_t *wave, uint32_t position);
 
 #endif
