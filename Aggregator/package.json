@@ -1,0 +1,29 @@
+{
+  "name": "open-satellite-project",
+  "version": "1.0.0",
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/racerxdl/open-satellite-project/Aggregator"
+  },
+  "dependencies" : {
+  },
+  "keywords" : [
+  ],
+  "devDependencies": {
+    "grunt": "*",
+    "grunt-cli": "*",
+    "grunt-html2js": "*",
+    "grunt-contrib-clean": "*",
+    "grunt-contrib-jshint": "*",
+    "grunt-contrib-watch": "*",
+    "grunt-bower-task": "*",
+    "express": "*",
+    "body-parser": "*",
+    "oauth2-server": "*",
+    "sequelize": "*",
+    "bcrypt": "*",
+    "pg": "*",
+    "pg-hstore": "*"
+  },
+  "license": "GPL-3.0"
+}
