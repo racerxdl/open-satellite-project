@@ -23,7 +23,8 @@
     "sequelize": "*",
     "bcrypt": "*",
     "pg": "*",
-    "pg-hstore": "*"
+    "pg-hstore": "*",
+    "connect-busboy": "*"
   },
   "license": "GPL-3.0"
 }
