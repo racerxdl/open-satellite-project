@@ -27,7 +27,8 @@ var TLEDatabase = function(sequelize) {
     perigee_argument        : { type: Sequelize.DECIMAL(7, 4), comment: "Argument of Perigee. The angle between the ascending node and the orbit's point of closest approach to the earth (perigee)" },
     mean_anomaly            : { type: Sequelize.DECIMAL(7, 4), comment: "Mean Anomaly (degrees). The angle, measured from perigee, of the satellite location in the orbit referenced to a circular orbit with radius equal to the semi-major axis." },
     mean_motion             : { type: Sequelize.DECIMAL(10, 8), comment: "Mean Motion. The value is the mean number of orbits per day the object completes" },
-    revolution_number       : { type: Sequelize.INTEGER, comment: " The orbit number at Epoch Time. This time is chosen very near the time of true ascending node passage as a matter of routine" }
+    revolution_number       : { type: Sequelize.INTEGER, comment: " The orbit number at Epoch Time. This time is chosen very near the time of true ascending node passage as a matter of routine" },
+    tle_data                : { type: Sequelize.TEXT, comment: "RAW TLE Data" }
   }, {
     indexes: [
       {
@@ -44,10 +45,10 @@ var TLEDatabase = function(sequelize) {
           return {data: null, err: "TLE Data not in Three Line format!"};
 
 
-        var name                      = tledata[0].trim();
+        var name                      = tledata[0].slice(2,tledata[0].length).trim();
         var satNum                    = tledata[1].slice(2,7).trim();
         var elementSetNumber          = parseInt(tledata[1].slice(64,68).trim());
-        var classification            = tledata[1][8];
+        var classification            = tledata[1][7];
         var international_designator  = tledata[1].slice(9,17).trim();
         var epoch_year                = parseInt(tledata[1].slice(18,20).trim());
         var epoch_day                 = parseFloat(tledata[1].slice(20,32).trim());
@@ -86,8 +87,9 @@ var TLEDatabase = function(sequelize) {
           tle.mean_anomaly = mean_anomaly;
           tle.mean_motion = mean_motion;
           tle.revolution_number = revolution_number;
+          tle.tle_data = tledata.join("\n");
         } else {
-          tle = this.TLE.build({
+          tle = this.build({
             name: name,
             satellite_number: satNum,
             element_set_number: elementSetNumber,
@@ -105,7 +107,8 @@ var TLEDatabase = function(sequelize) {
             perigee_argument: perigee_argument,
             mean_anomaly: mean_anomaly,
             mean_motion: mean_motion,
-            revolution_number: revolution_number
+            revolution_number: revolution_number,
+            tle_data: tledata.join("\n")
           });
           return { data: tle, err: null };
         }
@@ -113,8 +116,7 @@ var TLEDatabase = function(sequelize) {
     },
     instanceMethods: {
       toTLE: function() {
-        // TODO: Implement return to TLE
-        return "";
+        return this.tle_data;
       }
     }
   });
@@ -122,14 +124,14 @@ var TLEDatabase = function(sequelize) {
   this.TLE.sync();
 };
 
-
 TLEDatabase.prototype.addOrUpdate = function(tledata, cb) {
+  var _this = this;
   var tledata2 = tledata.split("\n");
   if (tledata2.length !== 3)
     return cb("TLE Data not in Three Line format!");
 
-  var satNum                    = tledata[1].slice(2,7).trim();
-  var elementSetNumber          = parseInt(tledata[1].slice(64,68).trim());
+  var satNum                    = tledata2[1].slice(2,7).trim();
+  var elementSetNumber          = parseInt(tledata2[1].slice(64,68).trim());
 
   this.TLE.findOne({
     where: {
@@ -139,8 +141,8 @@ TLEDatabase.prototype.addOrUpdate = function(tledata, cb) {
     var proc;
     if (tle !== null) {
       if (tle.element_set_number >= elementSetNumber)
-        return cb("Database TLE is more recent.");
-      proc = this.TLE.fromTLE(tledata, tle);
+        return cb("Database TLE is more recent.", tle);
+      proc = _this.TLE.fromTLE(tledata, tle);
 
       if (proc.err)
         return cb(proc.err, proc.data);
@@ -149,7 +151,7 @@ TLEDatabase.prototype.addOrUpdate = function(tledata, cb) {
         cb(null, proc.data);
       });
     } else {
-      proc = this.TLE.fromTLE(tledata);
+      proc = _this.TLE.fromTLE(tledata);
       if (proc.err)
         return cb(proc.err, proc.data);
 
