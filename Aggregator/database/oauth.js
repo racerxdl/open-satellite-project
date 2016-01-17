@@ -3,6 +3,7 @@
 
 var Sequelize = require("sequelize");
 var bcrypt = require('bcrypt');
+var Q = require('q');
 
 function encryptPassword(password) {
   return bcrypt.hashSync(password, 8);
@@ -60,15 +61,27 @@ var OAuthDatabase = function(sequelize) {
       }
     }
   });
+};
 
-  this.OAuthAcessToken.sync();
-  this.OAuthClient.sync();
-  this.OAuthRefreshToken.sync();
-  this.User.sync();
-  this.cleanExpiredTokens();
+OAuthDatabase.prototype.initialize = function() {
+  var _this = this;
+  return this.OAuthAcessToken.sync().then(function() {
+    console.log("Configuring table OAuthClient");
+    return _this.OAuthClient.sync();
+  }).then(function() {
+    console.log("Configuring table OAuthRefreshToken");
+    return _this.OAuthRefreshToken.sync();
+  }).then(function() {
+    console.log("Configuring table User");
+    return _this.User.sync();
+  }).then(function() {
+    console.log("Cleaning Expired Tokens");
+    return _this.cleanExpiredTokens();
+  });
 };
 
 OAuthDatabase.prototype.cleanExpiredTokens = function() {
+  var def = Q.defer();
   this.OAuthAcessToken.findAll({
     where: {
       expires: {
@@ -78,7 +91,10 @@ OAuthDatabase.prototype.cleanExpiredTokens = function() {
   }).then(function(expired) {
     for (var i in expired)
       expired[i].destroy();
+    def.resolve();
   });
+
+  return def.promise;
 };
 
 

@@ -19,4 +19,9 @@ var app = express();
 var oauthservice = new OAuthService(app, database);
 var imageuploadservice = new ImageUploadService(app, database);
 
-app.listen(3000);
+oauthservice.initialize().then(function() {
+  return imageuploadservice.initialize();
+}).then(function() {
+  console.log("Starting server at 0.0.0.0:3000");
+  app.listen(3000);
+});

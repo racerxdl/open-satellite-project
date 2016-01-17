@@ -3,11 +3,19 @@
 
 var fs = require('fs');
 var busboy = require('connect-busboy');
+var Q = require('q');
 
 var ImageUploadService = function(app, sequelize) {
+  this.app = app;
+  this.sequelize = sequelize;
+};
+
+ImageUploadService.prototype.initialize = function() {
+  var def = Q.defer();
+
   console.log("Initializing Image Upload Service");
-  app.use(busboy());
-  app.post('/image-service/upload', app.oauth.authorise(), function(req, res) {
+  this.app.use(busboy());
+  this.app.post('/image-service/upload', this.app.oauth.authorise(), function(req, res) {
     var fstream;
     req.pipe(req.busboy);
     req.busboy.on('file', function (fieldname, file, filename) {
@@ -22,6 +30,8 @@ var ImageUploadService = function(app, sequelize) {
   });
 
   console.log("Image Upload Service Initialized");
+  def.resolve();
+  return def.promise;
 };
 
 module.exports = ImageUploadService;

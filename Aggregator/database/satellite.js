@@ -7,7 +7,7 @@ var Sequelize = require("sequelize");
  *  Most data and info from http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/SSOP_Help/tle_def.html
  */
 
-var TLEDatabase = function(sequelize) {
+var SatelliteDatabase = function(sequelize) {
 
   this.TLE = sequelize.define("TLE", {
     satellite_number        : { type: Sequelize.INTEGER, allowNull: false, primaryKey: true, comment: "Satellite Number" },
@@ -30,6 +30,7 @@ var TLEDatabase = function(sequelize) {
     revolution_number       : { type: Sequelize.INTEGER, comment: " The orbit number at Epoch Time. This time is chosen very near the time of true ascending node passage as a matter of routine" },
     tle_data                : { type: Sequelize.TEXT, comment: "RAW TLE Data" }
   }, {
+    underscored: true,
     indexes: [
       {
         name: 'tle_satellite_number',
@@ -121,10 +122,122 @@ var TLEDatabase = function(sequelize) {
     }
   });
 
-  this.TLE.sync();
+  this.TrackSat = sequelize.define("TrackSat", {
+    track_id        : { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true, comment: "Tracking ID" },
+    type            : { type: Sequelize.ENUM('weather', 'transponder', 'other'), defaultValue: 'other', comment: "Tracking Type" },
+    enabled         : { type: Sequelize.BOOLEAN, defaultValue: true, comment: "If the tracking is enabled" },
+    satellite_number: { type: Sequelize.INTEGER, unique: true, references: {
+        model: this.TLE,
+        key: 'satellite_number',
+        deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
+      }
+    }
+  },{
+    underscored: true
+  });
+
+  this.Transponder = sequelize.define("Transponder", {
+    transponder_id  : { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true, comment: "Transponder ID" },
+    name            : { type: Sequelize.TEXT, comment: "Transponder Name" },
+    mod_type        : { type: Sequelize.ENUM('AFSK', 'FM', 'APT', 'LRPT', 'HRPT', 'Other'), defaultValue: 'Other', comment: "Modulation Type" },
+    mod_subtype     : { type: Sequelize.ENUM('Packet', 'Voice', 'APRS', 'SSTV', 'Other'), defaultValue: 'Other', comment: "Modulation Sub Type" },
+    mod_bitrate     : { type: Sequelize.INTEGER, defaultValue: 0, comment: "Modulation Bitrate (for digital modes)"},
+    uplink          : { type: Sequelize.DECIMAL(12, 5), defaultValue: 0.0, comment: "Uplink Frequency in MHz"},
+    downlink        : { type: Sequelize.DECIMAL(12,5), defaultValue: 0.0, comment: "Downlink Frequency in MHz"},
+    description     : { type: Sequelize.TEXT, comment: "Transponder Description" },
+    satellite_number: { type: Sequelize.INTEGER, references: {
+        model: this.TLE,
+        key: 'satellite_number',
+        deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
+      }
+    }
+  },{
+    underscored: true
+  });
 };
 
-TLEDatabase.prototype.addOrUpdate = function(tledata, cb) {
+SatelliteDatabase.prototype.initialize = function() {
+  var _this = this;
+  console.log("Creating TLE Table");
+  return this.TLE.sync().then(function() {
+    console.log("Creating Satellite Tracking Database");
+    return _this.TrackSat.sync();
+  }).then(function() {
+    console.log("Creating Transponder Database");
+    return _this.Transponder.sync();
+  });
+};
+
+SatelliteDatabase.prototype.addOrUpdateTrackSat = function(tracksatdata, cb) {
+  var _this = this;
+  this.TrackSat.findOne({
+    where: {
+      satellite_number: tracksatdata.satellite_number
+    }
+  }).then(function (tracksat) {
+    if (tracksat === null) {
+      tracksat = _this.TrackSat.build(tracksatdata);
+    } else {
+      tracksat.enabled = tracksatdata.enabled !== null ? tracksatdata.enabled : tracksat.enabled;
+      tracksat.type = tracksatdata.type !== null ? tracksatdata.type : tracksat.type;
+    }
+    tracksat.save().then(function() {
+      cb(null, tracksat)
+    }).catch(function(error) {
+      cb(error, null);
+    });
+  })
+};
+
+SatelliteDatabase.prototype.addOrUpdateTransponder = function(transponder_data, cb) {
+  var _this = this;
+  if (transponder_data.transponder_id !== null) {
+    this.Transponder.findOne({
+      where: {
+        transponder_id: transponder_data.transponder_id
+      }
+    }).then(function(transponder) {
+      if (transponder === null) {
+        transponder = _this.Transponder.build(transponder_data);
+      } else {
+        transponder.name = transponder_data.name !== null ? transponder_data.name : transponder.name;
+        transponder.mod_type = transponder_data.mod_type !== null ? transponder_data.mod_type : transponder.mod_type;
+        transponder.mod_subtype = transponder_data.mod_subtype !== null ? transponder_data.mod_subtype : transponder.mod_subtype;
+        transponder.mod_bitrate = transponder_data.mod_bitrate !== null ? transponder_data.mod_bitrate : transponder.mod_bitrate;
+        transponder.uplink = transponder_data.uplink !== null ? transponder_data.uplink : transponder.uplink;
+        transponder.downlink = transponder_data.downlink !== null ? transponder_data.downlink : transponder.downlink;
+        transponder.description = transponder_data.description !== null ? transponder_data.description : transponder.description;
+      }
+      transponder.save().then(function() {
+        cb(null, transponder)
+      }).catch(function(error) {
+        cb(error, null);
+      });
+    });
+  } else {
+    var transponder = this.Transponder.build(transponder_data);
+    transponder.save().then(function() {
+      return cb(null, transponder);
+    }).catch(function(error) {
+      cb(error, null);
+    });
+  }
+};
+
+SatelliteDatabase.prototype.getTrackSats = function(cb) {
+  this.TrackSat.findAll({
+    include: [{
+      model: this.TLE,
+      where: { satellite_number: Sequelize.col('TLE.satellite_number') }
+    }]
+  }).then(function(data) {
+    return cb(null, data);
+  }).catch(function(error) {
+    return cb(error, null);
+  });
+};
+
+SatelliteDatabase.prototype.addOrUpdateTLE = function(tledata, cb) {
   var _this = this;
   var tledata2 = tledata.split("\n");
   if (tledata2.length !== 3)
@@ -149,6 +262,8 @@ TLEDatabase.prototype.addOrUpdate = function(tledata, cb) {
 
       proc.data.save().then(function() {
         cb(null, proc.data);
+      }).catch(function(error) {
+        cb(error, null);
       });
     } else {
       proc = _this.TLE.fromTLE(tledata);
@@ -157,9 +272,11 @@ TLEDatabase.prototype.addOrUpdate = function(tledata, cb) {
 
       proc.data.save().then(function() {
         cb(null, proc.data);
+      }).catch(function(error) {
+        cb(error, null);
       });
     }
   });
 };
 
-module.exports = TLEDatabase;
+module.exports = SatelliteDatabase;
