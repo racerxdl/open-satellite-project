@@ -1,0 +1,24 @@
+{
+  "name": "open-satellite-project",
+  "version": "1.0.0",
+  "homepage": "https://github.com/racerxdl/open-satellite-project/Aggregator",
+  "authors": [
+    "Lucas Teske"
+  ],
+  "keywords": [
+  ],
+  "dependencies" : {
+    "jquery"  : "*",
+    "requestAnimationFrame" : "*"
+  },
+  "license": "GPL-3.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "spec",
+    "example"
+  ]
+}
