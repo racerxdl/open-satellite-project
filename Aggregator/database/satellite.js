@@ -136,6 +136,8 @@ var SatelliteDatabase = function(sequelize) {
     underscored: true
   });
 
+  this.TrackSat.belongsTo(this.TLE, { foreignKey: 'satellite_number' });
+
   this.Transponder = sequelize.define("Transponder", {
     transponder_id  : { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true, comment: "Transponder ID" },
     name            : { type: Sequelize.TEXT, comment: "Transponder Name" },
@@ -226,10 +228,19 @@ SatelliteDatabase.prototype.addOrUpdateTransponder = function(transponder_data, 
 
 SatelliteDatabase.prototype.getTrackSats = function(cb) {
   this.TrackSat.findAll({
-    include: [{
-      model: this.TLE,
-      where: { satellite_number: Sequelize.col('TLE.satellite_number') }
-    }]
+    include: [{model: this.TLE}]
+  }).then(function(data) {
+    return cb(null, data);
+  }).catch(function(error) {
+    return cb(error, null);
+  });
+};
+
+SatelliteDatabase.prototype.getTransponders = function(satnumber, cb) {
+  this.Transponder.findAll({
+    where: {
+      "satellite_number": satnumber
+    }
   }).then(function(data) {
     return cb(null, data);
   }).catch(function(error) {
