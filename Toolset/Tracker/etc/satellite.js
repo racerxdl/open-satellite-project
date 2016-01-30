@@ -60,7 +60,7 @@ Satellite.prototype.update = function(time, observer) {
 
     if (this.inRange != this.lookAngles.elevation > 0) {
       this.inRange      = this.lookAngles.elevation > 0;
-      if (inRange) {
+      if (this.inRange) {
         this.callEvent("inRange");
       } else {
         this.callEvent("outOfRange");
@@ -69,7 +69,7 @@ Satellite.prototype.update = function(time, observer) {
 
     if (this.almostInRange != this.lookAngles.elevation > -0.2) {
       this.almostInRange = this.lookAngles.elevation > -0.2;
-      if (almostInRange) {
+      if (this.almostInRange) {
         this.callEvent("almostInRange");
       } else {
         this.callEvent("outOfAlmostInRange");
