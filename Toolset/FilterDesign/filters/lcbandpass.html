@@ -1,0 +1,67 @@
+<script>
+  $( document ).ready(function() {
+    $("#bandpass_f1").keyup(bandPassUpdate);
+    $("#bandpass_f2").keyup(bandPassUpdate);
+    $("#bandpass_zo").keyup(bandPassUpdate);
+    bandPassInit();
+  });
+</script>
+<div class="mdl-grid">
+  <div class="mdl-cell mdl-cell--2-col mdl-cell--2-col-tablet mdl-cell--3-col-desktop"/>
+  <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--4-col mdl-cell--4-col-tablet mdl-cell--6-col-desktop">
+    <div class="bandpass_lc_head mdl-card__title mdl-card--expand mdl-color--teal-300">
+      <h2 class="mdl-card__title-text" style="color: white">Bandpass LC Filter</h2>
+    </div>
+    <div class="mdl-card__supporting-text mdl-color-text--grey-600">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--4-col">
+          <form action="#">
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="text" id="bandpass_f1" value="130MHz">
+              <label class="mdl-textfield__label" for="bandpass_f1">F1 (Lower Frequency Hz)</label>
+              <span class="mdl-textfield__error">Input is not a number!</span>
+              <div class="mdl-tooltip" for="bandpass_f1">
+                Lower Cut Frequency in Hz. It accepts 137, 137kHz, 137MHz, 137GHz or 137THz as values
+              </div>
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="text" id="bandpass_f2" value="140MHz">
+              <label class="mdl-textfield__label" for="bandpass_f2">F2 (Upper Frequency Hz)</label>
+              <span class="mdl-textfield__error">Input is not a number!</span>
+              <div class="mdl-tooltip" for="bandpass_f2">
+                Upper Cut Frequency in Hz. It accepts 137, 137kHz, 137MHz, 137GHz or 137THz as values
+              </div>
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="bandpass_zo" value="75">
+              <label class="mdl-textfield__label" for="bandpass_zo">Zo (Impedance in Ohms)</label>
+              <span class="mdl-textfield__error">Input is not a number!</span>
+              <div class="mdl-tooltip" for="bandpass_zo">
+                The circuit impedance value in Ohms
+              </div>
+            </div>
+          </form>
+        </div>
+         <div class="mdl-cell mdl-cell--8-col" style="text-align: center">
+            <div id="bandpass_canvas_holder">
+              <canvas id="bandpass_canvas" width="350" height="160"/>
+            </div>
+            <div class="mdl-tooltip" for="bandpass_canvas_holder">
+              The result of the calculation and the circuit to build
+            </div>
+         </div>
+      </div>
+      <div>
+        <div id="bandpass_response_canvas_holder">
+          <canvas width="650" height="220" id="bandpass_response"/>
+        </div>
+        <div class="mdl-tooltip" for="bandpass_response_canvas_holder">
+          Frequency Response of the filter
+        </div>
+        <BR/>
+        <BR/>
+      </div>
+    </div>
+  </div>
+  <div class="mdl-cell mdl-cell--2-col mdl-cell--2-col-tablet mdl-cell--3-col-desktop"/>
+</div>

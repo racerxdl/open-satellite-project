@@ -1,0 +1,27 @@
+html, body {
+  font-family: 'Roboto', 'Helvetica', sans-serif;
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  min-height: 0%;
+}
+
+.bandpass_lc_head {
+  background-image: url('/img/lc_bandpass.png');
+  background-repeat: no-repeat;
+  background-position: 90% 0%;
+  height: 100px;
+}
+
+.top-bar-transparent {
+  background-color: black;
+  background: url('/img/main_page_bg.jpg') center ;
+  background-repeat: repeat-x;
+  width:100%;
+  height: 100%;
+}
+.top-bar-transparent .mdl-layout__header,
+.top-bar-transparent .mdl-layout__drawer-button {
+  /* This background is dark, so we set text to white. Use 87% black instead if
+     your background is light. */
+  color: white;
+}

@@ -1,0 +1,24 @@
+{
+  "name": "Filter Design",
+  "version": "1.0.0",
+  "homepage": "https://github.com/racerxdl/open-satellite-project/Toolset/FilterDesign",
+  "authors": [
+    "Lucas Teske"
+  ],
+  "keywords": [],
+  "dependencies" : {
+    "jquery"  : "*",
+    "requestAnimationFrame" : "*",
+    "material-design-lite" : "*"
+  },
+  "license": "GPL-3.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "spec",
+    "example"
+  ]
+}
