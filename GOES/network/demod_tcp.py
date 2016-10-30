@@ -4,7 +4,7 @@
 # GNU Radio Python Flow Graph
 # Title: LRIT Demodulator TCP Pipe
 # Author: Lucas Teske
-# Generated: Thu Oct 27 23:32:36 2016
+# Generated: Sun Oct 30 17:16:15 2016
 ##################################################
 
 if __name__ == '__main__':
@@ -30,9 +30,12 @@ from gnuradio.filter import firdes
 from gnuradio.wxgui import fftsink2
 from gnuradio.wxgui import forms
 from gnuradio.wxgui import scopesink2
+from gnuradio.wxgui import waterfallsink2
 from grc_gnuradio import blks2 as grc_blks2
 from grc_gnuradio import wxgui as grc_wxgui
 from optparse import OptionParser
+import osmosdr
+import time
 import wx
 
 
@@ -59,13 +62,32 @@ class demod_tcp(grc_wxgui.top_block_gui):
         ##################################################
         # Blocks
         ##################################################
-        self.nb_0 = self.nb_0 = wx.Notebook(self.GetWin(), style=wx.NB_TOP)
-        self.nb_0.AddPage(grc_wxgui.Panel(self.nb_0), "FFT")
-        self.nb_0.AddPage(grc_wxgui.Panel(self.nb_0), "BPSK Constellation")
-        self.Add(self.nb_0)
+        _vgagain_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._vgagain_text_box = forms.text_box(
+        	parent=self.GetWin(),
+        	sizer=_vgagain_sizer,
+        	value=self.vgagain,
+        	callback=self.set_vgagain,
+        	label='VGA Gain',
+        	converter=forms.int_converter(),
+        	proportion=0,
+        )
+        self._vgagain_slider = forms.slider(
+        	parent=self.GetWin(),
+        	sizer=_vgagain_sizer,
+        	value=self.vgagain,
+        	callback=self.set_vgagain,
+        	minimum=0,
+        	maximum=15,
+        	num_steps=15,
+        	style=wx.SL_HORIZONTAL,
+        	cast=int,
+        	proportion=1,
+        )
+        self.GridAdd(_vgagain_sizer, 4, 1, 1, 1)
         _pll_alpha_sizer = wx.BoxSizer(wx.VERTICAL)
         self._pll_alpha_text_box = forms.text_box(
-        	parent=self.nb_0.GetPage(1).GetWin(),
+        	parent=self.GetWin(),
         	sizer=_pll_alpha_sizer,
         	value=self.pll_alpha,
         	callback=self.set_pll_alpha,
@@ -74,7 +96,7 @@ class demod_tcp(grc_wxgui.top_block_gui):
         	proportion=0,
         )
         self._pll_alpha_slider = forms.slider(
-        	parent=self.nb_0.GetPage(1).GetWin(),
+        	parent=self.GetWin(),
         	sizer=_pll_alpha_sizer,
         	value=self.pll_alpha,
         	callback=self.set_pll_alpha,
@@ -85,10 +107,56 @@ class demod_tcp(grc_wxgui.top_block_gui):
         	cast=float,
         	proportion=1,
         )
-        self.nb_0.GetPage(1).Add(_pll_alpha_sizer)
+        self.GridAdd(_pll_alpha_sizer, 6, 1, 1, 1)
+        _mixgain_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._mixgain_text_box = forms.text_box(
+        	parent=self.GetWin(),
+        	sizer=_mixgain_sizer,
+        	value=self.mixgain,
+        	callback=self.set_mixgain,
+        	label='Mixer Gain',
+        	converter=forms.int_converter(),
+        	proportion=0,
+        )
+        self._mixgain_slider = forms.slider(
+        	parent=self.GetWin(),
+        	sizer=_mixgain_sizer,
+        	value=self.mixgain,
+        	callback=self.set_mixgain,
+        	minimum=0,
+        	maximum=15,
+        	num_steps=15,
+        	style=wx.SL_HORIZONTAL,
+        	cast=int,
+        	proportion=1,
+        )
+        self.GridAdd(_mixgain_sizer, 3, 1, 1, 1)
+        _lnagain_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._lnagain_text_box = forms.text_box(
+        	parent=self.GetWin(),
+        	sizer=_lnagain_sizer,
+        	value=self.lnagain,
+        	callback=self.set_lnagain,
+        	label='LNA Gain',
+        	converter=forms.int_converter(),
+        	proportion=0,
+        )
+        self._lnagain_slider = forms.slider(
+        	parent=self.GetWin(),
+        	sizer=_lnagain_sizer,
+        	value=self.lnagain,
+        	callback=self.set_lnagain,
+        	minimum=0,
+        	maximum=15,
+        	num_steps=15,
+        	style=wx.SL_HORIZONTAL,
+        	cast=int,
+        	proportion=1,
+        )
+        self.GridAdd(_lnagain_sizer, 2, 1, 1, 1)
         _clock_alpha_sizer = wx.BoxSizer(wx.VERTICAL)
         self._clock_alpha_text_box = forms.text_box(
-        	parent=self.nb_0.GetPage(1).GetWin(),
+        	parent=self.GetWin(),
         	sizer=_clock_alpha_sizer,
         	value=self.clock_alpha,
         	callback=self.set_clock_alpha,
@@ -97,7 +165,7 @@ class demod_tcp(grc_wxgui.top_block_gui):
         	proportion=0,
         )
         self._clock_alpha_slider = forms.slider(
-        	parent=self.nb_0.GetPage(1).GetWin(),
+        	parent=self.GetWin(),
         	sizer=_clock_alpha_sizer,
         	value=self.clock_alpha,
         	callback=self.set_clock_alpha,
@@ -108,10 +176,25 @@ class demod_tcp(grc_wxgui.top_block_gui):
         	cast=float,
         	proportion=1,
         )
-        self.nb_0.GetPage(1).Add(_clock_alpha_sizer)
+        self.GridAdd(_clock_alpha_sizer, 5, 1, 1, 1)
+        self.wxgui_waterfallsink2_0 = waterfallsink2.waterfall_sink_c(
+        	self.GetWin(),
+        	baseband_freq=center_freq,
+        	dynamic_range=10,
+        	ref_level=-40,
+        	ref_scale=2,
+        	sample_rate=samp_rate,
+        	fft_size=16384,
+        	fft_rate=15,
+        	average=False,
+        	avg_alpha=None,
+        	title='Input Waterfall',
+        	win=window.hamming,
+        )
+        self.GridAdd(self.wxgui_waterfallsink2_0.win, 0, 0, 1, 1)
         self.wxgui_scopesink2_0_0 = scopesink2.scope_sink_c(
-        	self.nb_0.GetPage(0).GetWin(),
-        	title='Scope Plot',
+        	self.GetWin(),
+        	title='BPSK Constellation',
         	sample_rate=symbol_rate,
         	v_scale=0.5,
         	v_offset=0,
@@ -122,23 +205,9 @@ class demod_tcp(grc_wxgui.top_block_gui):
         	trig_mode=wxgui.TRIG_MODE_AUTO,
         	y_axis_label='Counts',
         )
-        self.nb_0.GetPage(0).Add(self.wxgui_scopesink2_0_0.win)
-        self.wxgui_scopesink2_0 = scopesink2.scope_sink_c(
-        	self.nb_0.GetPage(1).GetWin(),
-        	title='Scope Plot',
-        	sample_rate=symbol_rate,
-        	v_scale=0.5,
-        	v_offset=0,
-        	t_scale=0.5,
-        	ac_couple=False,
-        	xy_mode=True,
-        	num_inputs=1,
-        	trig_mode=wxgui.TRIG_MODE_AUTO,
-        	y_axis_label='Counts',
-        )
-        self.nb_0.GetPage(1).Add(self.wxgui_scopesink2_0.win)
+        self.GridAdd(self.wxgui_scopesink2_0_0.win, 2, 0, 6, 1)
         self.wxgui_fftsink2_0 = fftsink2.fft_sink_c(
-        	self.nb_0.GetPage(0).GetWin(),
+        	self.GetWin(),
         	baseband_freq=1691e6,
         	y_per_div=1,
         	y_divs=10,
@@ -153,84 +222,35 @@ class demod_tcp(grc_wxgui.top_block_gui):
         	peak_hold=True,
         	win=window.hamming,
         )
-        self.nb_0.GetPage(0).Add(self.wxgui_fftsink2_0.win)
-        _vgagain_sizer = wx.BoxSizer(wx.VERTICAL)
-        self._vgagain_text_box = forms.text_box(
-        	parent=self.nb_0.GetPage(0).GetWin(),
-        	sizer=_vgagain_sizer,
-        	value=self.vgagain,
-        	callback=self.set_vgagain,
-        	label='VGA Gain',
-        	converter=forms.int_converter(),
-        	proportion=0,
-        )
-        self._vgagain_slider = forms.slider(
-        	parent=self.nb_0.GetPage(0).GetWin(),
-        	sizer=_vgagain_sizer,
-        	value=self.vgagain,
-        	callback=self.set_vgagain,
-        	minimum=0,
-        	maximum=15,
-        	num_steps=15,
-        	style=wx.SL_HORIZONTAL,
-        	cast=int,
-        	proportion=1,
-        )
-        self.nb_0.GetPage(0).Add(_vgagain_sizer)
+        self.GridAdd(self.wxgui_fftsink2_0.win, 0, 1, 1, 1)
         self.root_raised_cosine_filter_0 = filter.fir_filter_ccf(1, firdes.root_raised_cosine(
         	1, samp_rate, symbol_rate, 0.5, 361))
-        _mixgain_sizer = wx.BoxSizer(wx.VERTICAL)
-        self._mixgain_text_box = forms.text_box(
-        	parent=self.nb_0.GetPage(0).GetWin(),
-        	sizer=_mixgain_sizer,
-        	value=self.mixgain,
-        	callback=self.set_mixgain,
-        	label='Mixer Gain',
-        	converter=forms.int_converter(),
-        	proportion=0,
+        self.rational_resampler_xxx_0 = filter.rational_resampler_ccc(
+                interpolation=15,
+                decimation=18,
+                taps=None,
+                fractional_bw=None,
         )
-        self._mixgain_slider = forms.slider(
-        	parent=self.nb_0.GetPage(0).GetWin(),
-        	sizer=_mixgain_sizer,
-        	value=self.mixgain,
-        	callback=self.set_mixgain,
-        	minimum=0,
-        	maximum=15,
-        	num_steps=15,
-        	style=wx.SL_HORIZONTAL,
-        	cast=int,
-        	proportion=1,
-        )
-        self.nb_0.GetPage(0).Add(_mixgain_sizer)
-        _lnagain_sizer = wx.BoxSizer(wx.VERTICAL)
-        self._lnagain_text_box = forms.text_box(
-        	parent=self.nb_0.GetPage(0).GetWin(),
-        	sizer=_lnagain_sizer,
-        	value=self.lnagain,
-        	callback=self.set_lnagain,
-        	label='LNA Gain',
-        	converter=forms.int_converter(),
-        	proportion=0,
-        )
-        self._lnagain_slider = forms.slider(
-        	parent=self.nb_0.GetPage(0).GetWin(),
-        	sizer=_lnagain_sizer,
-        	value=self.lnagain,
-        	callback=self.set_lnagain,
-        	minimum=0,
-        	maximum=15,
-        	num_steps=15,
-        	style=wx.SL_HORIZONTAL,
-        	cast=int,
-        	proportion=1,
-        )
-        self.nb_0.GetPage(0).Add(_lnagain_sizer)
+        self.osmosdr_source_0_0 = osmosdr.source( args="numchan=" + str(1) + " " + 'airspy=0' )
+        self.osmosdr_source_0_0.set_sample_rate(3e6)
+        self.osmosdr_source_0_0.set_center_freq(center_freq, 0)
+        self.osmosdr_source_0_0.set_freq_corr(0, 0)
+        self.osmosdr_source_0_0.set_dc_offset_mode(1, 0)
+        self.osmosdr_source_0_0.set_iq_balance_mode(1, 0)
+        self.osmosdr_source_0_0.set_gain_mode(False, 0)
+        self.osmosdr_source_0_0.set_gain(lnagain, 0)
+        self.osmosdr_source_0_0.set_if_gain(vgagain, 0)
+        self.osmosdr_source_0_0.set_bb_gain(mixgain, 0)
+        self.osmosdr_source_0_0.set_antenna('', 0)
+        self.osmosdr_source_0_0.set_bandwidth(0, 0)
+          
+        self.low_pass_filter_0_0 = filter.fir_filter_ccf(2, firdes.low_pass(
+        	1, samp_rate*2, symbol_rate * 2, 50e3, firdes.WIN_KAISER, 6.76))
         self.digital_costas_loop_cc_0 = digital.costas_loop_cc(pll_alpha, 2, False)
         self.digital_clock_recovery_mm_xx_0 = digital.clock_recovery_mm_cc(sps, clock_alpha**2/4.0, 0.5, clock_alpha, 0.005)
-        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         self.blocks_stream_to_vector_0 = blocks.stream_to_vector(gr.sizeof_char*1, 16)
+        self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_char*16)
         self.blocks_float_to_char_0 = blocks.float_to_char(1, 127)
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/media/ELTN/HAM/GOES/BaseBand/gqrx_20161024_184415_1691000000_1250000_fc.raw', False)
         self.blocks_complex_to_real_0 = blocks.complex_to_real(1)
         self.blks2_tcp_sink_0 = grc_blks2.tcp_sink(
         	itemsize=gr.sizeof_char*16,
@@ -246,15 +266,17 @@ class demod_tcp(grc_wxgui.top_block_gui):
         ##################################################
         self.connect((self.analog_agc_xx_0, 0), (self.root_raised_cosine_filter_0, 0))    
         self.connect((self.analog_agc_xx_0, 0), (self.wxgui_fftsink2_0, 0))    
+        self.connect((self.analog_agc_xx_0, 0), (self.wxgui_waterfallsink2_0, 0))    
         self.connect((self.blocks_complex_to_real_0, 0), (self.blocks_float_to_char_0, 0))    
-        self.connect((self.blocks_file_source_0, 0), (self.blocks_throttle_0, 0))    
         self.connect((self.blocks_float_to_char_0, 0), (self.blocks_stream_to_vector_0, 0))    
         self.connect((self.blocks_stream_to_vector_0, 0), (self.blks2_tcp_sink_0, 0))    
-        self.connect((self.blocks_throttle_0, 0), (self.analog_agc_xx_0, 0))    
+        self.connect((self.blocks_stream_to_vector_0, 0), (self.blocks_null_sink_0, 0))    
         self.connect((self.digital_clock_recovery_mm_xx_0, 0), (self.blocks_complex_to_real_0, 0))    
-        self.connect((self.digital_clock_recovery_mm_xx_0, 0), (self.wxgui_scopesink2_0, 0))    
         self.connect((self.digital_clock_recovery_mm_xx_0, 0), (self.wxgui_scopesink2_0_0, 0))    
         self.connect((self.digital_costas_loop_cc_0, 0), (self.digital_clock_recovery_mm_xx_0, 0))    
+        self.connect((self.low_pass_filter_0_0, 0), (self.analog_agc_xx_0, 0))    
+        self.connect((self.osmosdr_source_0_0, 0), (self.rational_resampler_xxx_0, 0))    
+        self.connect((self.rational_resampler_xxx_0, 0), (self.low_pass_filter_0_0, 0))    
         self.connect((self.root_raised_cosine_filter_0, 0), (self.digital_costas_loop_cc_0, 0))    
 
     def get_symbol_rate(self):
@@ -264,8 +286,8 @@ class demod_tcp(grc_wxgui.top_block_gui):
         self.symbol_rate = symbol_rate
         self.set_sps((self.samp_rate*1.0)/(self.symbol_rate*1.0))
         self.wxgui_scopesink2_0_0.set_sample_rate(self.symbol_rate)
-        self.wxgui_scopesink2_0.set_sample_rate(self.symbol_rate)
         self.root_raised_cosine_filter_0.set_taps(firdes.root_raised_cosine(1, self.samp_rate, self.symbol_rate, 0.5, 361))
+        self.low_pass_filter_0_0.set_taps(firdes.low_pass(1, self.samp_rate*2, self.symbol_rate * 2, 50e3, firdes.WIN_KAISER, 6.76))
 
     def get_samp_rate(self):
         return self.samp_rate
@@ -273,9 +295,10 @@ class demod_tcp(grc_wxgui.top_block_gui):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.set_sps((self.samp_rate*1.0)/(self.symbol_rate*1.0))
+        self.wxgui_waterfallsink2_0.set_sample_rate(self.samp_rate)
         self.wxgui_fftsink2_0.set_sample_rate(self.samp_rate)
         self.root_raised_cosine_filter_0.set_taps(firdes.root_raised_cosine(1, self.samp_rate, self.symbol_rate, 0.5, 361))
-        self.blocks_throttle_0.set_sample_rate(self.samp_rate)
+        self.low_pass_filter_0_0.set_taps(firdes.low_pass(1, self.samp_rate*2, self.symbol_rate * 2, 50e3, firdes.WIN_KAISER, 6.76))
 
     def get_vgagain(self):
         return self.vgagain
@@ -284,6 +307,7 @@ class demod_tcp(grc_wxgui.top_block_gui):
         self.vgagain = vgagain
         self._vgagain_slider.set_value(self.vgagain)
         self._vgagain_text_box.set_value(self.vgagain)
+        self.osmosdr_source_0_0.set_if_gain(self.vgagain, 0)
 
     def get_sps(self):
         return self.sps
@@ -308,6 +332,7 @@ class demod_tcp(grc_wxgui.top_block_gui):
         self.mixgain = mixgain
         self._mixgain_slider.set_value(self.mixgain)
         self._mixgain_text_box.set_value(self.mixgain)
+        self.osmosdr_source_0_0.set_bb_gain(self.mixgain, 0)
 
     def get_lnagain(self):
         return self.lnagain
@@ -316,6 +341,7 @@ class demod_tcp(grc_wxgui.top_block_gui):
         self.lnagain = lnagain
         self._lnagain_slider.set_value(self.lnagain)
         self._lnagain_text_box.set_value(self.lnagain)
+        self.osmosdr_source_0_0.set_gain(self.lnagain, 0)
 
     def get_clock_alpha(self):
         return self.clock_alpha
@@ -332,9 +358,13 @@ class demod_tcp(grc_wxgui.top_block_gui):
 
     def set_center_freq(self, center_freq):
         self.center_freq = center_freq
+        self.wxgui_waterfallsink2_0.set_baseband_freq(self.center_freq)
+        self.osmosdr_source_0_0.set_center_freq(self.center_freq, 0)
 
 
 def main(top_block_cls=demod_tcp, options=None):
+    if gr.enable_realtime_scheduling() != gr.RT_OK:
+        print "Error: failed to enable real-time scheduling."
 
     tb = top_block_cls()
     tb.Start(True)
