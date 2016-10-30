@@ -11,7 +11,8 @@
 #include <fec.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "pn.h"
+#include <time.h>
+#include "random/pn.h"
 
 // Header, because I don't want an extra file
 
@@ -31,6 +32,7 @@
 #define VITPOLYB 0x6D
 
 #define CHECK_VITERBI_CORRECTIONS
+//#define DUMP_CORRUPTED_PACKETS
 
 #define CODEDFRAMESIZE (FRAMEBITS * 2)
 #define SYNCWORDSIZEDOUBLE (SYNCWORDSIZE * 2)
@@ -62,6 +64,7 @@ uint8_t decodedData[FRAMESIZE];
 uint8_t correctedData[CODEDFRAMESIZE];
 uint8_t rsCorrectedData[FRAMESIZE];
 uint8_t rsWorkBuffer[255];
+int startTime;
 
 uint8_t M_PDU[886];
 
@@ -78,12 +81,15 @@ uint32_t calculateError(uint8_t *original, uint8_t *corrected, int length);
 void deinterleaveRS(uint8_t *data, uint8_t *rsbuff, uint8_t pos, uint8_t I);
 void interleaveRS(uint8_t *idata, uint8_t *outbuff, uint8_t pos, uint8_t I);
 void writeChannel(uint8_t *data, int size, uint16_t vcid);
+int getTimeStamp();
+
 // Code
 
 void display(uint8_t scid, uint8_t vcid, uint32_t packetNumber, uint16_t vitErrors, uint16_t frameBits, uint32_t *rsErrors,
              uint8_t signalQuality, uint8_t syncCorrelation, uint8_t phaseCorrection,
              uint32_t lostPackets, uint16_t averageVitCorrections, uint8_t averageRSCorrections,
-             uint32_t droppedPackets, uint32_t *receivedPacketsPerChannel, uint32_t *lostPacketsPerChannel) {
+             uint32_t droppedPackets, uint32_t *receivedPacketsPerChannel, uint32_t *lostPacketsPerChannel, uint32_t totalPackets) {
+  int runningTime = getTimeStamp() - startTime;
   gotoxy(0, 0);
   printf("┌─────────────────────────────────────────────────────────────────────────────┐\n");
   printf("|                         LRIT DECODER - Lucas Teske                          |\n");
@@ -95,11 +101,11 @@ void display(uint8_t scid, uint8_t vcid, uint32_t packetNumber, uint16_t vitErro
   printf("| VC ID: %3u                           |  Average Viterbi Correction:  %4u   |\n", vcid, averageVitCorrections);
   printf("| Packet Number: %10u            |  Average RS Correction:         %2u   |\n", packetNumber, averageRSCorrections);
   printf("| Viterbi Errors: %4u/%4u bits       |  Total Dropped Packets: %10u   |\n", vitErrors, frameBits, droppedPackets);
-  printf("| Signal Quality: %3u%%                 |                                      |\n", signalQuality);
+  printf("| Signal Quality: %3u%%                 |  Total Packets:         %10u   |\n", signalQuality, totalPackets);
   printf("| RS Errors: %2u %2u %2u %2u               |──────────────────────────────────────|\n", rsErrors[0], rsErrors[1], rsErrors[2], rsErrors[3]);
   printf("| Sync Correlation: %2u                 |             Channel Data             |\n", syncCorrelation);
   printf("| Phase Correction: %3u                |──────────────────────────────────────|\n", phaseCorrection);
-  printf("|                                      |  Chan  |   Received   |     Lost     |\n");
+  printf("| Running Time: %10u             |  Chan  |   Received   |     Lost     |\n", runningTime);
 
   int maxChannels = 8;
   int printedChannels = 0;
@@ -258,11 +264,37 @@ void interleaveRS(uint8_t *idata, uint8_t *outbuff, uint8_t pos, uint8_t I) {
   }
 }
 
+int getTimeStamp() {
+  return (int)time(NULL);
+}
+
 void writeChannel(uint8_t *data, int size, uint16_t vcid) {
   char filename[256];
   sprintf(filename, "channels/channel_%d.bin", vcid);
   FILE *f = fopen(filename, "a+");
   fwrite(data, size, 1, f);
+  fclose(f);
+}
+
+void dumpCorruptedPacket(uint8_t *data, int size, int type) {
+  char filename[128];
+  sprintf(filename, "errors/%d-%d-%d.bin", getTimeStamp(), size, type);
+  FILE *f = fopen(filename, "wb");
+  // For more visibility, I write 6 times
+  for (int i=0; i<6;i++) {
+    fwrite(data, size, 1, f);
+  }
+  fclose(f);
+}
+
+void dumpCorruptedPacketStatistics(uint16_t viterbiErrors, uint8_t syncCorrelation) {
+  char data[256];
+  memset(data, 0x00, 256);
+  sprintf(data, "errors/%d.txt", getTimeStamp());
+  FILE *f = fopen(data, "wb");
+  memset(data, 0x00, 256);
+  sprintf(data, "Viterbi Errors: %d\nSync Correlation %d\n", viterbiErrors, syncCorrelation);
+  fwrite(data, 256, 1, f);
   fclose(f);
 }
 
@@ -346,6 +378,7 @@ int main(int argc,char *argv[]) {
   newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
   printf("Client connected\n");
   clear();
+  startTime = getTimeStamp();
   while (TRUE) {
     // Read Data
     uint32_t chunkSize = CODEDFRAMESIZE;
@@ -432,6 +465,10 @@ int main(int argc,char *argv[]) {
       // If RS returns -1 for all 4 RS Blocks,
       if (derrors[0] == -1 && derrors[1] == -1 && derrors[2] == -1 && derrors[3] == -1) {
         droppedPackets++;
+        #ifdef DUMP_CORRUPTED_PACKETS
+        dumpCorruptedPacket(decodedData, FRAMESIZE, 0);
+        dumpCorruptedPacket(rsCorrectedData, FRAMESIZE, 1);
+        #endif
         goto packet_process_end;
       } else {
         averageRSCorrections += derrors[0] != -1 ? derrors[0] : 0;
@@ -465,7 +502,7 @@ int main(int argc,char *argv[]) {
       display(scid, vcid, counter, errors, FRAMEBITS, derrors,
            signalQuality, maxCorr, phaseCorr,
            lostPackets, partialVitCorrections, partialRSCorrections,
-           droppedPackets, receivedPacketsPerFrame, lostPacketsPerFrame);
+           droppedPackets, receivedPacketsPerFrame, lostPacketsPerFrame, frameCount);
 
 packet_process_end:
       averageVitCorrections += errors;
