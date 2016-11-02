@@ -1,0 +1,13 @@
+﻿<Properties StartupItem="BitDisplay/BitDisplay.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="BitDisplay/MainWindow.cs">
+    <Files>
+      <File FileName="BitDisplay/Program.cs" Line="27" Column="27" />
+      <File FileName="BitDisplay/MainWindow.cs" Line="51" Column="10" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
