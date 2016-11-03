@@ -40,24 +40,16 @@
 
 const uint64_t UW0 = 0xfca2b63db00d9794;
 const uint64_t UW2 = 0x035d49c24ff2686b;
-const uint64_t REVUW0 = 0xfc51793e700e6b68;
-const uint64_t REVUW2 = 0x03ae86c18ff19497;
 
 typedef struct {
   uint32_t uw0mc;
   uint32_t uw0p;
   uint32_t uw2mc;
   uint32_t uw2p;
-  uint32_t ruw0mc;
-  uint32_t ruw0p;
-  uint32_t ruw2mc;
-  uint32_t ruw2p;
 } correlation_t ;
 
 uint8_t UW0b[SYNCWORDSIZE * 2];
 uint8_t UW2b[SYNCWORDSIZE * 2];
-uint8_t REVUW0b[SYNCWORDSIZE * 2];
-uint8_t REVUW2b[SYNCWORDSIZE * 2];
 
 uint8_t codedData[CODEDFRAMESIZE];
 uint8_t decodedData[FRAMESIZE];
@@ -97,15 +89,15 @@ void display(uint8_t scid, uint8_t vcid, uint32_t packetNumber, uint16_t vitErro
   printf("|         Current Frame Data           |               Statistics             |\n");
   printf("|──────────────────────────────────────|──────────────────────────────────────|\n");
   printf("|                                      |                                      |\n");
-  printf("| SC ID: %3u                           |  Total Lost Packets:    %10u   |\n", scid, lostPackets);
-  printf("| VC ID: %3u                           |  Average Viterbi Correction:  %4u   |\n", vcid, averageVitCorrections);
-  printf("| Packet Number: %10u            |  Average RS Correction:         %2u   |\n", packetNumber, averageRSCorrections);
-  printf("| Viterbi Errors: %4u/%4u bits       |  Total Dropped Packets: %10u   |\n", vitErrors, frameBits, droppedPackets);
-  printf("| Signal Quality: %3u%%                 |  Total Packets:         %10u   |\n", signalQuality, totalPackets);
-  printf("| RS Errors: %2u %2u %2u %2u               |──────────────────────────────────────|\n", rsErrors[0], rsErrors[1], rsErrors[2], rsErrors[3]);
-  printf("| Sync Correlation: %2u                 |             Channel Data             |\n", syncCorrelation);
-  printf("| Phase Correction: %3u                |──────────────────────────────────────|\n", phaseCorrection);
-  printf("| Running Time: %10u             |  Chan  |   Received   |     Lost     |\n", runningTime);
+  printf("| SC ID:                           %3u |  Total Lost Packets:    %10u   |\n", scid, lostPackets);
+  printf("| VC ID:                           %3u |  Average Viterbi Correction:  %4u   |\n", vcid, averageVitCorrections);
+  printf("| Packet Number:            %10u |  Average RS Correction:         %2u   |\n", packetNumber, averageRSCorrections);
+  printf("| Viterbi Errors:       %4u/%4u bits |  Total Dropped Packets: %10u   |\n", vitErrors, frameBits, droppedPackets);
+  printf("| Signal Quality:                 %3u%% |  Total Packets:         %10u   |\n", signalQuality, totalPackets);
+  printf("| RS Errors:               %2u %2u %2u %2u |──────────────────────────────────────|\n", rsErrors[0], rsErrors[1], rsErrors[2], rsErrors[3]);
+  printf("| Sync Correlation:                 %2u |             Channel Data             |\n", syncCorrelation);
+  printf("| Phase Correction:                %3u |──────────────────────────────────────|\n", phaseCorrection);
+  printf("| Running Time:             %10u |  Chan  |   Received   |     Lost     |\n", runningTime);
 
   int maxChannels = 8;
   int printedChannels = 0;
@@ -131,20 +123,15 @@ uint32_t swapEndianess(uint32_t num) {
   return  ((num>>24)&0xff) | ((num<<8)&0xff0000) | ((num>>8)&0xff00) | ((num<<24)&0xff000000);
 }
 
-uint32_t maxCorrelation(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
-  uint32_t f = (a > b ? a : b);
-  uint32_t g = (c > d ? c : d);
-  return f > g ? f : g;
+uint32_t maxCorrelation(uint32_t a, uint32_t b) {
+  return (a > b ? a : b);
 }
-
 
 void initUW() {
   printf("Converting Sync Words to Soft Data\n");
   for (int i = 0; i < SYNCWORDSIZEDOUBLE; i++) {
     UW0b[i] = (UW0 >> (SYNCWORDSIZEDOUBLE-i-1)) & 1 ? 0xFF : 0x00;
     UW2b[i] = (UW2 >> (SYNCWORDSIZEDOUBLE-i-1)) & 1 ? 0xFF : 0x00;
-    REVUW0b[i] = (REVUW0 >> (SYNCWORDSIZEDOUBLE-i-1)) & 1 ? 0xFF : 0x00;
-    REVUW2b[i] = (REVUW2 >> (SYNCWORDSIZEDOUBLE-i-1)) & 1 ? 0xFF : 0x00;
   }
 }
 
@@ -158,25 +145,17 @@ void checkCorrelation(uint8_t *buffer, int buffLength, correlation_t *corr) {
   for (int i = 0; i < buffLength - SYNCWORDSIZEDOUBLE; i++) {
     uint32_t uw0c = 0;
     uint32_t uw2c = 0;
-    uint32_t ruw0c = 0;
-    uint32_t ruw2c = 0;
 
     for (int k = 0; k < SYNCWORDSIZEDOUBLE; k++) {
       uw0c += hardCorrelate(buffer[i+k], UW0b[k]);
       uw2c += hardCorrelate(buffer[i+k], UW2b[k]);
-      ruw0c += hardCorrelate(buffer[i+k], REVUW0b[k]);
-      ruw2c += hardCorrelate(buffer[i+k], REVUW2b[k]);
     }
 
     corr->uw0p = uw0c > corr->uw0mc ? i : corr->uw0p;
     corr->uw2p = uw2c > corr->uw2mc ? i : corr->uw2p;
-    corr->ruw0p = ruw0c > corr->ruw0mc ? i : corr->ruw0p;
-    corr->ruw2p = ruw2c > corr->ruw2mc ? i : corr->ruw2p;
 
     corr->uw0mc = uw0c > corr->uw0mc ? uw0c : corr->uw0mc;
     corr->uw2mc = uw2c > corr->uw2mc ? uw2c : corr->uw2mc;
-    corr->ruw0mc = ruw0c > corr->ruw0mc ? ruw0c : corr->ruw0mc;
-    corr->ruw2mc = ruw2c > corr->ruw2mc ? ruw2c : corr->ruw2mc;
   }
 }
 
@@ -187,12 +166,6 @@ void resetCorrelation(correlation_t * corr) {
 void fixPacket(uint8_t *buffer, int buffLength, uint8_t n) {
   if (n != 0) {
     for (int i=0; i < buffLength; i+=2) {
-      if (n % 2) {  // Process IQ Inversion
-        char a = buffer[i];
-        buffer[i] = buffer[i+1];
-        buffer[i+1] = a;
-      }
-
       if (n >= 4) { // Process 180 phase shift, aka inverted bits
         buffer[i] ^= 0xFF;
         buffer[i+1] ^= 0xFF;
@@ -392,7 +365,7 @@ int main(int argc,char *argv[]) {
     // Check Correlation
     checkCorrelation(codedData, chunkSize, &corr);
     // Get Max Correlation
-    uint32_t maxCorr = maxCorrelation(corr.uw0mc, corr.uw2mc, corr.ruw0mc, corr.ruw2mc);
+    uint32_t maxCorr = maxCorrelation(corr.uw0mc, corr.uw2mc);
 
     if (maxCorr < MINCORRELATIONBITS) {
       printf("  Skipping read. Correlation %d less than required %d.\n", maxCorr, MINCORRELATIONBITS);
@@ -407,12 +380,6 @@ int main(int argc,char *argv[]) {
       } else if (maxCorr == corr.uw2mc) {
         n = 4;
         p = corr.uw2p;
-      } else if (maxCorr == corr.ruw0mc) {
-        n = 1;
-        p = corr.ruw0p;
-      } else if (maxCorr == corr.ruw2mc) {
-        n = 5;
-        p = corr.ruw2p;
       }
 
       if (p != 0) {
@@ -440,7 +407,7 @@ int main(int argc,char *argv[]) {
       // Calculate Errors
       convEncode(decodedData, FRAMESIZE, correctedData, CODEDFRAMESIZE);
       uint32_t errors = calculateError(codedData, correctedData, CODEDFRAMESIZE) / 2;
-      float signalErrors = (100.f * errors) / FRAMEBITS; // 0 to 16
+      float signalErrors = (100.f * errors) / (FRAMEBITS / 2); // 0 to 16
       signalErrors = 100 - (signalErrors * 10);
       uint32_t signalQuality = signalErrors < 0 ? 0 : signalErrors;
       #endif
