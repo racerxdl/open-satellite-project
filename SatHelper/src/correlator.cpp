@@ -8,6 +8,12 @@
 #include "correlator.h"
 #include "WordSizeException.h"
 
+using namespace SatHelper;
+
+Correlator::Correlator() {
+
+}
+
 void Correlator::addWord(uint32_t word) {
     if (currentWordSize != 0 && currentWordSize != 32) {
         throw WordSizeException(32, currentWordSize);
@@ -57,9 +63,13 @@ void Correlator::correlate(uint8_t *data, uint32_t length) {
 
     // TODO: Use Duff's Device for numWords iteration
     for (int i = 0; i < maxSearch; i++) {
+        for (int n = 0; n < numWords; n++) {
+            tmpCorrelation[n] = 0;
+        }
+
         for (int k = 0; k < wordSize; k++) {
             for (int n = 0; n < numWords; n++) {
-                tmpCorrelation[n] += Correlator::hardCorrelate(data[i + k], words[n][k]);
+                tmpCorrelation[n] += (uint32_t) Correlator::hardCorrelate(data[i + k], words[n][k]);
             }
         }
 
@@ -75,7 +85,7 @@ void Correlator::correlate(uint8_t *data, uint32_t length) {
     uint32_t corr = 0;
     for (int n = 0; n < numWords; n++) {
         if (correlation[n] > corr) {
-            highestCorrelation = n;
+            wordNumber = n;
             corr = correlation[n];
         }
     }

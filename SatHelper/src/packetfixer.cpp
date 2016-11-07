@@ -7,6 +7,13 @@
 
 #include "packetfixer.h"
 
+
+using namespace SatHelper;
+
+bool PacketFixer::initialized = false;
+uint8_t PacketFixer::deg90LUT[256];
+uint8_t PacketFixer::iqInvertLUT[256];
+
 void PacketFixer::initializeLUT() {
     for (int i = 0; i < 256; i++) {
         // Phase Ambiquity Mapping for every two bits:
@@ -25,6 +32,7 @@ void PacketFixer::initializeLUT() {
         // IQ Inversion. Swap every two bits
         iqInvertLUT[i] = (i & 0x55) << 1 | (i & 0xAA) >> 1;
     }
+    initialized = true;
 }
 
 void PacketFixer::fixPacket(uint8_t *data, uint32_t length, PhaseShift phaseShift, bool iqInversion) {

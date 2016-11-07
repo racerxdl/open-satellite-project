@@ -12,11 +12,13 @@
 #include <viterbi27.h>
 #include <reedsolomon.h>
 #include <packetfixer.h>
+#include <screenmanager.h>
+#include <ipaddress.h>
+#include <tcpsocket.h>
+#include <tcpserver.h>
+#include <derandomizer.h>
+#include <tools.h>
 
-// Exceptions
-
-#include <SatHelperException.h>
-#include <ViterbiCreationException.h>
-#include <WordSizeException.h>
+#include <exceptions.h>
 
 #endif /* SATHELPER_INCLUDES_SATHELPER_H_ */
