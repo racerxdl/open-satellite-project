@@ -5,4 +5,5 @@ Debug/**/*.d
 Release/*.so
 Release/**/*.o
 Release/**/*.d
-
+Debug/newdecoder
+Release/newdecoder
