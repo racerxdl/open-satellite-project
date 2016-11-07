@@ -109,5 +109,5 @@ void Display::update(uint8_t scid, uint8_t vcid, uint64_t packetNumber, uint16_t
         this->receivedPacketsPerChannel[i] = receivedPacketsPerChannel[i];
         this->lostPacketsPerChannel[i] = lostPacketsPerChannel[i];
     }
-    this->totalPackets = 0;
+    this->totalPackets = totalPackets;
 }
