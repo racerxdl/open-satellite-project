@@ -1,0 +1,8 @@
+channels/
+Debug/*.so
+Debug/**/*.o
+Debug/**/*.d
+Release/*.so
+Release/**/*.o
+Release/**/*.d
+
