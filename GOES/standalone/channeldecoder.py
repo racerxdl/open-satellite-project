@@ -24,7 +24,7 @@ from subprocess import call
 FRAMESIZE = 892
 M_PDUSIZE = FRAMESIZE - 6
 EXPORTCORRUPT = False
-USEDECOMPRESSOR = False
+USEDECOMPRESSOR = True
 
 tsize = 0
 isCompressed = True
@@ -41,7 +41,7 @@ SEQUENCE_FLAG_MAP = {
 
 def Decompressor(prefix, pixels, startnum, endnum):
   startnum += 1
-  call(["wine", "Decompress.exe", prefix, str(pixels), str(startnum), str(endnum), "a"], env={"WINEDEBUG":"-all"})
+  call(["wine", "Decompress.exe", prefix, str(pixels), str(startnum), str(endnum), "a"], env={"WINEDEBUG":"fixme-all"})
   for i in range(startnum-1, endnum+1):
     k = "%s%s.lrit" % (prefix, i)
     if os.path.exists(k):
@@ -138,8 +138,11 @@ def SavePacket(channelid, packet):
 
 
   crc = packet["data"][datasize-2:datasize]
-  crc = struct.unpack(">H", crc)[0]
-  crc = CheckCRC(data, crc)
+  if len(crc) == 2:
+    crc = struct.unpack(">H", crc)[0]
+    crc = CheckCRC(data, crc)
+  else:
+    crc = False
   if not crc:
     print "   WARNING: CRC does not match!"
     totalCRCErrors += 1
@@ -159,6 +162,8 @@ def SavePacket(channelid, packet):
         if USEDECOMPRESSOR and startnum != -1:
           decompressed = Decompressor("channels/%s/%s_%s_" % (channelid, packet["apid"], packet["version"]), pixels, startnum, endnum)
           packetmanager.manageFile(decompressed)
+          startnum = -1
+          endnum = -1
       else:
         #print "File is not compressed. Checking headers."
         packetmanager.manageFile(filename)
@@ -201,6 +206,7 @@ def CreatePacket(data):
       SavePacket(sys.argv[1], pendingpackets[apid])
       del pendingpackets[apid]
       data = data[packetlength+2:]
+      apid = -1
       #print "   Multiple packets in same buffer. Repeating."
     else:
       break
