@@ -1,0 +1,12 @@
+channels/
+Debug/*.so
+Debug/**/*.o
+Debug/**/*.d
+Release/*.so
+Release/**/*.o
+Release/**/*.d
+Debug/Meteor
+Release/Meteor
+Release Static/Meteor
+Release Static/**/*.o
+Release Static/**/*.d
