@@ -126,6 +126,7 @@ int main(int argc, char *argv[]) {
 
 	int startNumber = 10212;
 	int endNumber = 10323;
+	int overflowCaseLast = -1;
 
 	std::istringstream(argv[3]) >> startNumber;
 	std::istringstream(argv[4]) >> endNumber;
@@ -139,6 +140,12 @@ int main(int argc, char *argv[]) {
 
 	if (f == NULL || f2 == NULL) {
 		std::cerr << "Error opening base files" << std::endl;
+		if (f == NULL) {
+			std::cerr << "Error opening: " << baseFilename.c_str() << std::endl;
+		}
+		if (f2 == NULL) {
+			std::cerr << "Error opening: " << buildFilename(PREFIX, startNumber - 1).c_str() << std::endl;
+		}
 		return 1;
 	}
 
@@ -157,12 +164,26 @@ int main(int argc, char *argv[]) {
 
 	if (debugMode) std::cout << "Header wrote. Reading sequence" << std::endl;
 
+	if (endNumber < startNumber) {
+		// Overflow case
+		overflowCaseLast = endNumber;
+		endNumber = 16383;
+	}
 
 	for (int i = startNumber; i <= endNumber; i++) {
 		std::string infile = buildFilename(PREFIX, i);
 		if (debugMode) std::cout << "Opening file " << infile << std::endl;
 		processFile(infile, baseFilename);
 	}
+
+	if (overflowCaseLast != -1) {
+		for (int i = 0; i < overflowCaseLast; i++) {
+			std::string infile = buildFilename(PREFIX, i);
+			if (debugMode) std::cout << "Opening file " << infile << std::endl;
+			processFile(infile, baseFilename);
+		}
+	}
+	
 	if (debugMode) std::cout << "Finished!" << std::endl;
 	if (argc < 6) {
 		int x;
