@@ -169,7 +169,7 @@ int main() {
             channelWriter.writeChannel(rsCorrectedData, FRAMESIZE - RSPARITYBLOCK - (SYNCWORDSIZE/8), vcid);
 
             if (lastPacketCount[vcid]+1 != counter && lastPacketCount[vcid] > -1) {
-              int lostCount = counter - lastPacketCount[vcid] + 1;
+              int lostCount = counter - lastPacketCount[vcid] - 1;
               lostPackets += lostCount;
               lostPacketsPerFrame[vcid] += lostCount;
             }
