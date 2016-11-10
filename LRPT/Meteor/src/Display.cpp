@@ -42,7 +42,7 @@ void Display::show() {
     int runningTime = SatHelper::Tools::getTimestamp() - startTime;
     screenManager.GotoXY(0, 0);
     std::cout << "┌─────────────────────────────────────────────────────────────────────────────┐" << std::endl;
-    std::cout << "|                         LRIT DECODER - Lucas Teske                          |" << std::endl;
+    std::cout << "|                      METEOR M N2 LRPT DECODER - Lucas Teske                 |" << std::endl;
     std::cout << "|─────────────────────────────────────────────────────────────────────────────|" << std::endl;
     std::cout << "|         Current Frame Data           |               Statistics             |" << std::endl;
     std::cout << "|──────────────────────────────────────|──────────────────────────────────────|" << std::endl;
@@ -85,7 +85,7 @@ void Display::show() {
 }
 
 void Display::update(uint8_t scid, uint8_t vcid, uint64_t packetNumber, uint16_t vitErrors, uint16_t frameBits, int32_t *rsErrors, uint8_t signalQuality,
-        uint8_t syncCorrelation, uint8_t phaseCorrection, uint64_t lostPackets, uint16_t averageVitCorrections, uint8_t averageRSCorrections,
+        uint8_t syncCorrelation, uint16_t phaseCorrection, uint64_t lostPackets, uint16_t averageVitCorrections, uint8_t averageRSCorrections,
         uint64_t droppedPackets, int64_t *receivedPacketsPerChannel, int64_t *lostPacketsPerChannel, uint64_t totalPackets) {
 
     this->scid = scid;

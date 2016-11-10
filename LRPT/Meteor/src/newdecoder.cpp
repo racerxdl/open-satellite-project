@@ -146,13 +146,10 @@ int main() {
             int32_t derrors[4] = { 0, 0, 0, 0 };
             for (int i=0; i<RSBLOCKS; i++) {
               reedSolomon.deinterleave(decodedData, rsWorkBuffer, i, RSBLOCKS);
-              derrors[i] = reedSolomon.decode_ccsds(rsWorkBuffer);
+              derrors[i] = reedSolomon.decode_rs8(rsWorkBuffer);
               reedSolomon.interleave(rsWorkBuffer, rsCorrectedData, i, RSBLOCKS);
             }
 
-            channelWriter.writeChannel(decodedData, FRAMESIZE, 9999);
-
-            std::cout << "RS: " << derrors[0] << " " << derrors[1] << " " << derrors[2] << " " << derrors[3] << std::endl;
             if (derrors[0] == -1 && derrors[1] == -1 && derrors[2] == -1 && derrors[3] == -1) {
               droppedPackets++;
               #ifdef DUMP_CORRUPTED_PACKETS
@@ -161,6 +158,14 @@ int main() {
               channelWriter.dumpCorruptedPacket(rsCorrectedData, FRAMESIZE, 2);
               channelWriter.dumpCorruptedPacketStatistics(viterbi.GetBER(), corr);
               #endif
+              uint16_t partialVitCorrections = (uint16_t) (averageVitCorrections / frameCount);
+              uint8_t partialRSCorrections = (uint8_t) (averageRSCorrections / frameCount);
+              display.update(0, 0, 0, viterbi.GetBER(), FRAMEBITS, derrors,
+                      signalQuality, corr, 0,
+                      lostPackets, partialVitCorrections, partialRSCorrections,
+                      droppedPackets, receivedPacketsPerFrame, lostPacketsPerFrame, frameCount);
+
+              display.show();
               continue;
             } else {
               averageRSCorrections += derrors[0] != -1 ? derrors[0] : 0;
@@ -179,10 +184,10 @@ int main() {
             counter = SatHelper::Tools::swapEndianess(counter);
             counter &= 0xFFFFFF00;
             counter = counter >> 8;
-            //writeChannel(rsCorrectedData, FRAMESIZE - RSPARITYBLOCK - (SYNCWORDSIZE/8), vcid);
             channelWriter.writeChannel(rsCorrectedData, FRAMESIZE - RSPARITYBLOCK - (SYNCWORDSIZE/8), vcid);
 
-            if (lastPacketCount[vcid]+1 != counter && lastPacketCount[vcid] > -1) {
+            int lostCount = counter - lastPacketCount[vcid] - 1;
+            if (lastPacketCount[vcid]+1 != counter && lastPacketCount[vcid] > -1 && lostCount > 0) {
               int lostCount = counter - lastPacketCount[vcid] - 1;
               lostPackets += lostCount;
               lostPacketsPerFrame[vcid] += lostCount;
@@ -190,12 +195,12 @@ int main() {
 
             lastPacketCount[vcid] = counter;
             receivedPacketsPerFrame[vcid] = receivedPacketsPerFrame[vcid] == -1 ? 1 : receivedPacketsPerFrame[vcid] + 1;
-            uint8_t phaseCorr;
+            uint16_t phaseCorr;
             switch (phaseShift) {
 				case SatHelper::PhaseShift::DEG_0: phaseCorr = 0; break;
 				case SatHelper::PhaseShift::DEG_90: phaseCorr = 90; break;
 				case SatHelper::PhaseShift::DEG_180: phaseCorr = 180; break;
-				case SatHelper::PhaseShift::DEG_270: phaseCorr = 250; break;
+				case SatHelper::PhaseShift::DEG_270: phaseCorr = 270; break;
             }
             uint16_t partialVitCorrections = (uint16_t) (averageVitCorrections / frameCount);
             uint8_t partialRSCorrections = (uint8_t) (averageRSCorrections / frameCount);
