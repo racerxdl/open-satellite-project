@@ -1,4 +1,8 @@
 GOES LRIT Demodulator / Demuxer / Decoder
 =========================================
 
-COMPLETE WORK IN PROGRESS - STAY TUNED!
+This folder contains deprecated code that will be removed in the future. Please check:
+
+* [Demodulator](GOES/demodulator)
+* [Decoder](GOES/decoder)
+* [Channel Decoder](GOES/channeldecoder)
