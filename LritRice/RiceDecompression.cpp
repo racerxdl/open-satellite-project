@@ -8,14 +8,15 @@
 #include "RiceDecompression.h"
 #include <memory.h>
 
-CRiceDecompression::CRiceDecompression(int Mask, int BitsPerPixel, int PixelsPerBlock, int PixelsPerScanline, int ScanLinesPerPacket) {
-    this->m_BitsPerPixel = BitsPerPixel;
-    this->m_PixelsPerBlock = PixelsPerBlock;
-    this->m_ScanLinesPerPacket = ScanLinesPerPacket;
-    this->m_PixelsPerScanline = PixelsPerScanline;
-    this->m_CompressionMode = (NN_OPTION_MASK & Mask) > 0;
-    this->m_MsbFirst = (MSB_OPTION_MASK & Mask) > 0;
-    double p = (ScanLinesPerPacket * PixelsPerScanline * BitsPerPixel) * 0.125; // Let's see where its used.
+CRiceDecompression::CRiceDecompression(int Mask, int BitsPerPixel, int PixelsPerBlock, int PixelsPerScanline, int ScanLinesPerPacket)
+    : CPacketDecompression((ScanLinesPerPacket * PixelsPerScanline * BitsPerPixel) * 0.125),
+      m_BitsPerPixel(BitsPerPixel),
+      m_PixelsPerBlock(PixelsPerBlock),
+      m_ScanLinesPerPacket(ScanLinesPerPacket),
+      m_PixelsPerScanline(PixelsPerScanline),
+      m_CompressionMode((NN_OPTION_MASK & Mask) > 0),
+      m_MsbFirst((MSB_OPTION_MASK & Mask) > 0) {
+
     this->m_BlocksPerScanline = 0; // ?? Maybe this ^^^
 
     // Defaults
@@ -26,6 +27,7 @@ CRiceDecompression::CRiceDecompression(int Mask, int BitsPerPixel, int PixelsPer
     this->m_BytesPerPixel = 0;
     this->m_DefaultId = ID_DEFAULT;
     this->unkVal0 = 0;
+    Init();
 }
 
 void CRiceDecompression::Init() {
@@ -75,7 +77,7 @@ int CRiceDecompression::RiceDecode() {
     char buff32k[32776];
 
     char *buff32kPtr = buff32k;
-    int buff32kPtr2 = buff32k;
+    long buff32kPtr2 = (long) buff32k;
 
     while (true) {
         if (&buff32k[8 * m_PixelsPerScanline] < buff32kPtr) {
@@ -97,7 +99,7 @@ int CRiceDecompression::RiceDecode() {
                 dataLength = compressedLength + 1;
             }
 
-            int compressedLength2a = &buff32kPtr[-buff32kPtr2] >> 1;
+            long compressedLength2a = ((long)&buff32kPtr[-buff32kPtr2]) >> 1;
             memcpy(buff32k, (const void *)buff32kPtr2, 2 * compressedLength2a);
 
             char *lowBuff = &buff32k[2 * compressedLength2a];
@@ -112,9 +114,16 @@ int CRiceDecompression::RiceDecode() {
                     *((uint16_t*)(lowBuff-1)) = v9;
                 }
                 lowBuff = 0;
-                // Stopped Here
+                buff32kPtr = &buff32k[2 * (compressedLength2a + (dataLength >> 1))];
+                *((uint16_t *)lowBuff + 1) = 0;
+                buff32kPtr2 = (long) buff32k;
             }
         }
+
+        int v1 = *((uint16_t*)(buff32kPtr2 + 1)) | *((uint16_t*)(buff32kPtr2 << 16));
+        int v4 = 32;
+        buff32kPtr2 += 4;
+        // Stopped Here
     }
 
     // TODO
