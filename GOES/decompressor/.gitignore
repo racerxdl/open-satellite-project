@@ -1,3 +1,5 @@
 Release/*
 Debug/*
 *.VC.db
+*.idb
+*.dmp
