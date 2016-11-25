@@ -1,0 +1,4 @@
+Debug/*.lrpt
+Debug/**/*.o
+Debug/**/*.d
+Debug/Decompressor
