@@ -1,0 +1,8 @@
+dist: trusty
+sudo: required
+language: cpp
+compiler:
+  - gcc
+  - clang
+
+script: make libfec && sudo make libfec-install && make && make test
