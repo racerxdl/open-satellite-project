@@ -125,6 +125,7 @@ def readHeader(f):
   if type == 0:
     filetypecode, headerlength, datalength = struct.unpack(">BIQ", data)
     return type, filetypecode, headerlength, datalength
+
   elif type == 1:
     bitsperpixel, columns, lines, compression = struct.unpack(">BHHB", data)
     return type, bitsperpixel, columns, lines, compression

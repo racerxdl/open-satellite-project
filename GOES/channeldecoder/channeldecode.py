@@ -277,6 +277,7 @@ while readbytes < fsize:
       else:
         buff = ""
 
+    # ### MAYBE NEED AN ELIF HERE
     if not lastAPID == -1: # We are finishing another packet
       if fhp > 0:
         pendingpackets[lastAPID]["data"] += data[:fhp]

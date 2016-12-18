@@ -5,4 +5,4 @@ compiler:
   - gcc
   - clang
 
-script: make libfec && sudo make libfec-install && make && make test
+script: make libcorrect && sudo make libcorrect-install && make && make test
