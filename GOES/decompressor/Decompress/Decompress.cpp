@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdint.h> 
+#include <stdint.h>
 
 #include <mutex>
 #include <atomic>
@@ -70,8 +70,6 @@ int doOnlyOne(std::string filename, int Pixels) {
 
 	if (f == NULL) {
 		std::cerr << "Error Opening file" << std::endl;
-		int x;
-		std::cin >> x;
 		return -1;
 	}
 
@@ -99,8 +97,6 @@ int doOnlyOne(std::string filename, int Pixels) {
 	fwrite(Rice->Ptr(), Rice->Size(), 1, f);
 	fclose(f);
 	//Frees input memory
-	int x;
-	std::cin >> x;
 	delete[] data;
 }
 
@@ -113,11 +109,12 @@ int main(int argc, char *argv[]) {
 			filename = std::string(argv[2]);
 		} else {
 			std::cout << "Decompress Single File: " << std::endl;
-			std::cout << "	Usage: Decompress.exe Pixels Filename" << std::endl;
+			std::cout << "	Usage: Decompress.exe Pixels Filename [DebugMode]" << std::endl;
 			std::cout << "Decompress Array of Files: " << std::endl;
 			std::cout << "	Usage: Decompress.exe Prefix Pixels StartNumber EndNumber [DebugMode]" << std::endl;
 			return 1;
 		}
+		debugMode = argc > 3;
 		return doOnlyOne(filename, Pixels);
 	}
 	debugMode = argc == 7;
@@ -183,11 +180,7 @@ int main(int argc, char *argv[]) {
 			processFile(infile, baseFilename);
 		}
 	}
-	
+
 	if (debugMode) std::cout << "Finished!" << std::endl;
-	if (argc < 6) {
-		int x;
-		std::cin >> x;
-	}
 	return 0;
 }
