@@ -44,6 +44,24 @@ test: SatHelper decoder
 	@echo -e '\033[0;32mFinished testing GOES Decoder\033[0m'
 	@echo ' '
 
+libvolk: FORCE
+	@echo -e '\033[0;32mBuilding target: $@\033[0m'
+	@echo -e '\033[0;34m'
+	@git clone https://github.com/gnuradio/volk
+	@mkdir volk/build -p
+	@cd volk/build && cmake ..
+	$(MAKE) -C volk/build
+	@echo -e '\033[0m'
+	@echo -e '\033[0;32mFinished building target: $@\033[0m'
+
+libvolk-install: FORCE
+	@echo -e '\033[0;32mInstalling target: $@\033[0m'
+	@echo -e '\033[0;34m'
+	$(MAKE) -C volk/build install
+	@echo -e '\033[0m'
+	@echo -e '\033[0;32mFinished installing target: $@\033[0m'
+	@echo ' '
+
 libcorrect: FORCE
 	@echo -e '\033[0;32mBuilding target: $@\033[0m'
 	@echo -e '\033[0;34m'
