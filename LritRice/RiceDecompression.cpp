@@ -188,11 +188,102 @@ int CRiceDecompression::OutputDecodedData(unsigned* Sigma, unsigned char* ptr) {
     return m_BPtr - ptr;
 }
 
-void CRiceDecompression::Unmap_nn(unsigned *Sigma, int Pixels) {
+void CRiceDecompression::Unmap_nn(unsigned int *Sigma, int Pixels) {
+    unsigned int *sigma = Sigma;
+    unsigned int *sigmaPtr = Sigma;
+    unsigned int *sigmaA = &Sigma[Pixels];
+    unsigned int *twoSigmaPtr = sigma * 2;
+
+    int tmp4;
+
     if (m_BytesPerPixel == 1) {
-        unsigned char *s = (unsigned char *) Sigma;
-        unsigned int *sigmaPtr = Sigma;
-        // TODO
+        unsigned int *tmp = sigma + 1;
+        *m_Ext2Array1 = sigmaPtr;
+        int tmpVal = *tmp;
+        unsigned char *tmp2 = m_Ext2Array1 + 1;
+        unsigned int *tmp3 = tmp + 1;
+
+        if (tmpVal < twoSigmaPtr) {
+            if (tmpVal < 2 * (m_BPtr - sigmaPtr)) {
+                if (tmpVal & 1) {
+                    tmp4 = sigmaPtr - ((tmpVal+1) >> 1);
+                } else {
+                    tmp4 = (tmpVal >> 1) + sigmaPtr;
+                }
+            }
+        } else {
+            tmp4 = m_BPtr - tmpVal;
+        }
+        *tmp2 = tmp4;
+        int v18 = 0;
+        int v17;
+
+        for (int i=tmp2+1; i < sigmaA; i = v18 + 1) {
+            int v15 = *tmp3;
+            int v16 = tmp3[1];
+            tmp3 += 2;
+
+            if ( v15 < 2 * tmp4 ) {
+                if ( v15 <= 2 * (m_BPtr - tmp4)) {
+                    if (v15& 1) {
+                        v17 = tmp4 - ((v15 + 1) >> 1);
+                    } else {
+                        v17 = (v17 >> 1) + tmp4;
+                    }
+                } else {
+                    v17 = m_BPtr - v15;
+                }
+            } else {
+                v17 = v15;
+            }
+
+            i = v17;
+            v18 = i + 1;
+
+            if ( v16 < 2 * v17 ) {
+                if ( v16 <= 2 * (m_BPtr - v17)) {
+                    if (v16 & 1) {
+                        tmp4 = v17 - ((v16 + 1) >> 1);
+                    } else {
+                        tmp4 = (v16 >> 1) + v17;
+                    }
+                } else {
+                    tmp4 = m_BPtr - v16;
+                }
+            } else {
+                tmp4 = v16;
+            }
+
+            v18 = tmp4;
+        }
+        m_Ext2Array1 += Pixels;
+    } else if (m_BytesPerPixel == 2) {
+       unsigned int *v21 = sigma + 1;
+       *m_Ext2Array1 = (*((unsigned char*)&(sigmaPtr)+1));
+       int v22 = m_Ext2Array1 + 1;
+       *v22 = sigmaPtr;
+       int v23 = *v21;
+       unsigned char *v24 = v22 + 1;
+       unsigned int  *v25 = v21 + 1;
+       int v26;
+
+       if (v23 < twoSigmaPtr) {
+           if (v23 <= 2 * (m_BPtr - sigmaPtr)) {
+               if (v23 & 1) {
+                   v26 = sigmaPtr - ((v23 + 1) >> 1);
+               } else {
+                   v26 = (v23 >> 1) + sigmaPtr;
+               }
+           } else {
+               v26 = m_BPtr - v23;
+           }
+       } else {
+           v26 = v23;
+       }
+
+
+    } else {
+
     }
 }
 
