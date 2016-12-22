@@ -6,3 +6,4 @@ This is a multiple-program project (at least for now). But we got this working! 
 * [Demodulator](demodulator/)
 * [Decoder](decoder/)
 * [Channel Decoder](channeldecoder/)
+* [GOES Dump](goesdump/)

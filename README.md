@@ -10,3 +10,4 @@ For now we have working:
 * GOES Demodulator / Decoder / Packet Parser
 * SatHelper Library
 * APT Decoder (not a good one though)
+* BitDisplay
