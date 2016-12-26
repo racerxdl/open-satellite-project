@@ -38,19 +38,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: decoder
+all: demodulator
 
 # Tool invocations
-decoder: $(OBJS) $(USER_OBJS)
+demodulator: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L../../../SatHelper/Release\ \(Static\) -o "decoder" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L../../../SatHelper/Release\ \(Static\) -o "demodulator" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(C_UPPER_DEPS)$(CXX_DEPS)$(OBJS)$(CPP_DEPS)$(C_DEPS) decoder
+	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(C_UPPER_DEPS)$(CXX_DEPS)$(OBJS)$(CPP_DEPS)$(C_DEPS) demodulator
 	-@echo ' '
 
 .PHONY: all clean dependents
