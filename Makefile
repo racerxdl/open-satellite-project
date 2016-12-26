@@ -1,6 +1,6 @@
 
 
-all: SatHelper decoder
+all: SatHelper decoder demodulator
 
 clean:
 	@echo -e '\033[0;32mCleaning target SatHelper\033[0m'
@@ -13,6 +13,11 @@ clean:
 	$(MAKE) -C GOES/decoder clean
 	@echo -e '\033[0m'
 	@echo -e '\033[0;32mFinished cleaning GOES Decoder\033[0m'
+	@echo -e '\033[0;32mCleaning target GOES Demodulator\033[0m'
+	@echo -e '\033[0;34m'
+	$(MAKE) -C GOES/demodulator clean
+	@echo -e '\033[0m'
+	@echo -e '\033[0;32mFinished cleaning GOES Demodulator\033[0m'
 
 SatHelper: FORCE
 	@echo -e '\033[0;32mBuilding target: $@\033[0m'
@@ -30,7 +35,15 @@ decoder: SatHelper
 	@echo -e '\033[0;32mFinished building target: $@\033[0m'
 	@echo ' '
 
-test: SatHelper decoder
+demodulator: SatHelper
+	@echo -e '\033[0;32mBuilding target: $@\033[0m'
+	@echo -e '\033[0;34m'
+	$(MAKE) -C GOES/demodulator
+	@echo -e '\033[0m'
+	@echo -e '\033[0;32mFinished building target: $@\033[0m'
+	@echo ' '
+
+test: SatHelper decoder demodulator
 	@echo -e '\033[0;32mTesting SatHelper\033[0m'
 	@echo -e '\033[0;34m'
 	$(MAKE) -C SatHelper test
@@ -42,6 +55,12 @@ test: SatHelper decoder
 	$(MAKE) -C GOES/decoder test
 	@echo -e '\033[0m'
 	@echo -e '\033[0;32mFinished testing GOES Decoder\033[0m'
+	@echo ' '
+	@echo -e '\033[0;32mTesting GOES demodulator\033[0m'
+	@echo -e '\033[0;34m'
+	$(MAKE) -C GOES/demodulator test
+	@echo -e '\033[0m'
+	@echo -e '\033[0;32mFinished testing GOES demodulator\033[0m'
 	@echo ' '
 
 libvolk: FORCE
