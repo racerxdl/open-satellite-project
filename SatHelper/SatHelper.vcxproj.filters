@@ -16,6 +16,18 @@
     <Filter Include="Header Files\exceptions">
       <UniqueIdentifier>{2058791a-301d-41c1-8558-792b3bd704e6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\SIMD">
+      <UniqueIdentifier>{f56221c3-3ece-4a92-80d6-3091e50b80d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SIMD">
+      <UniqueIdentifier>{a75728ef-98af-4df6-8b41-da9870a64a72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\dsp">
+      <UniqueIdentifier>{3e4b27fc-0c24-4be3-82ae-7f17e29af0de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\dsp">
+      <UniqueIdentifier>{93942677-350d-47f9-862c-9d0b7bb339a0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="includes\correlator.h">
@@ -42,6 +54,99 @@
     <ClInclude Include="includes\exceptions\WordSizeException.h">
       <Filter>Header Files\exceptions</Filter>
     </ClInclude>
+    <ClInclude Include="includes\SIMD\MemoryOp.h">
+      <Filter>Header Files\SIMD</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\SIMD\Operations.h">
+      <Filter>Header Files\SIMD</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\SIMD\SIMD.h">
+      <Filter>Header Files\SIMD</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\derandomizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\exceptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\ipaddress.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\screenmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\socket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\tcpclient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\tcpserver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\tcpsocket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\tools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\exceptions\ClientDisconnectedException.h">
+      <Filter>Header Files\exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\exceptions\NotAllDataSentException.h">
+      <Filter>Header Files\exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\exceptions\SocketAcceptException.h">
+      <Filter>Header Files\exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\exceptions\SocketBindException.h">
+      <Filter>Header Files\exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\exceptions\SocketConnectException.h">
+      <Filter>Header Files\exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\exceptions\SocketErrorException.h">
+      <Filter>Header Files\exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\exceptions\SocketException.h">
+      <Filter>Header Files\exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\exceptions\SocketNotReadyException.h">
+      <Filter>Header Files\exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\exceptions\SocketWriteException.h">
+      <Filter>Header Files\exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\dsp\agc.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\dsp\clockrecovery.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\dsp\controlloop.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\dsp\costasloop.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\dsp\fftwindows.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\dsp\filters.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\dsp\firfilter.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\dsp\firinterpolator.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\dsp\firkernel.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\dsp\interpolator_taps.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\correlator.cpp">
@@ -55,6 +160,51 @@
     </ClCompile>
     <ClCompile Include="src\viterbi27.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SIMD\MemoryOp.cpp">
+      <Filter>Source Files\SIMD</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SIMD\Operations.cpp">
+      <Filter>Source Files\SIMD</Filter>
+    </ClCompile>
+    <ClCompile Include="src\derandomizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\screenmanager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\socket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tcpclient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tcpserver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\clockrecovery.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\controlloop.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\costasloop.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\fftwindows.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\filters.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\firfilter.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\firinterpolator.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dsp\firkernel.cpp">
+      <Filter>Source Files\dsp</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -129,18 +129,64 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="includes\correlator.h" />
+    <ClInclude Include="includes\derandomizer.h" />
+    <ClInclude Include="includes\dsp\agc.h" />
+    <ClInclude Include="includes\dsp\clockrecovery.h" />
+    <ClInclude Include="includes\dsp\controlloop.h" />
+    <ClInclude Include="includes\dsp\costasloop.h" />
+    <ClInclude Include="includes\dsp\fftwindows.h" />
+    <ClInclude Include="includes\dsp\filters.h" />
+    <ClInclude Include="includes\dsp\firfilter.h" />
+    <ClInclude Include="includes\dsp\firinterpolator.h" />
+    <ClInclude Include="includes\dsp\firkernel.h" />
+    <ClInclude Include="includes\dsp\interpolator_taps.h" />
+    <ClInclude Include="includes\exceptions.h" />
+    <ClInclude Include="includes\exceptions\ClientDisconnectedException.h" />
+    <ClInclude Include="includes\exceptions\NotAllDataSentException.h" />
     <ClInclude Include="includes\exceptions\SatHelperException.h" />
+    <ClInclude Include="includes\exceptions\SocketAcceptException.h" />
+    <ClInclude Include="includes\exceptions\SocketBindException.h" />
+    <ClInclude Include="includes\exceptions\SocketConnectException.h" />
+    <ClInclude Include="includes\exceptions\SocketErrorException.h" />
+    <ClInclude Include="includes\exceptions\SocketException.h" />
+    <ClInclude Include="includes\exceptions\SocketNotReadyException.h" />
+    <ClInclude Include="includes\exceptions\SocketWriteException.h" />
     <ClInclude Include="includes\exceptions\ViterbiCreationException.h" />
     <ClInclude Include="includes\exceptions\WordSizeException.h" />
+    <ClInclude Include="includes\ipaddress.h" />
     <ClInclude Include="includes\packetfixer.h" />
     <ClInclude Include="includes\reedsolomon.h" />
     <ClInclude Include="includes\sathelper.h" />
+    <ClInclude Include="includes\screenmanager.h" />
+    <ClInclude Include="includes\SIMD\MemoryOp.h" />
+    <ClInclude Include="includes\SIMD\Operations.h" />
+    <ClInclude Include="includes\SIMD\SIMD.h" />
+    <ClInclude Include="includes\socket.h" />
+    <ClInclude Include="includes\tcpclient.h" />
+    <ClInclude Include="includes\tcpserver.h" />
+    <ClInclude Include="includes\tcpsocket.h" />
+    <ClInclude Include="includes\tools.h" />
     <ClInclude Include="includes\viterbi27.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\correlator.cpp" />
+    <ClCompile Include="src\derandomizer.cpp" />
+    <ClCompile Include="src\dsp\clockrecovery.cpp" />
+    <ClCompile Include="src\dsp\controlloop.cpp" />
+    <ClCompile Include="src\dsp\costasloop.cpp" />
+    <ClCompile Include="src\dsp\fftwindows.cpp" />
+    <ClCompile Include="src\dsp\filters.cpp" />
+    <ClCompile Include="src\dsp\firfilter.cpp" />
+    <ClCompile Include="src\dsp\firinterpolator.cpp" />
+    <ClCompile Include="src\dsp\firkernel.cpp" />
     <ClCompile Include="src\packetfixer.cpp" />
     <ClCompile Include="src\reedsolomon.cpp" />
+    <ClCompile Include="src\screenmanager.cpp" />
+    <ClCompile Include="src\SIMD\MemoryOp.cpp" />
+    <ClCompile Include="src\SIMD\Operations.cpp" />
+    <ClCompile Include="src\socket.cpp" />
+    <ClCompile Include="src\tcpclient.cpp" />
+    <ClCompile Include="src\tcpserver.cpp" />
     <ClCompile Include="src\viterbi27.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
