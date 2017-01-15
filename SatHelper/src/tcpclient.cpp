@@ -2,21 +2,26 @@
  * tcpclient.cpp
  *
  *  Created on: 25/12/2016
- *      Author: lucas
+ *      Author: Lucas Teske
  */
 
 #include "tcpclient.h"
 #include <cstdio>
-#include <unistd.h>
-#include <socket.h>
-#include <sys/resource.h>
-#include <sys/select.h>
-#include <sys/ioctl.h>
-#include <netdb.h>
-#include <sstream>
-#include <iostream>
 #include "exceptions.h"
 #include <fcntl.h>
+
+#ifdef _WIN32
+    #include <windows.h>
+    #include <winsock2.h>
+    #include <Ws2tcpip.h>
+#else
+    #include <unistd.h>
+    #include <socket.h>
+    #include <sys/resource.h>
+    #include <sys/select.h>
+    #include <sys/ioctl.h>
+    #include <netdb.h>
+#endif
 
 namespace SatHelper {
 

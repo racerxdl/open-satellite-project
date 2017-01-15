@@ -5,7 +5,6 @@ using System.Net.Sockets;
 
 namespace OpenSatelliteProject {
     public class Connector {
-
         #region Delegate
 
         public delegate void StatisticsEvent(Statistics_st data);
@@ -13,33 +12,32 @@ namespace OpenSatelliteProject {
         public delegate void ChannelDataEvent(byte[] data);
 
         #endregion
-
         #region Event
 
         public event StatisticsEvent StatisticsAvailable;
         public event ChannelDataEvent ChannelDataAvailable;
 
         #endregion
-
         #region Threads
 
         private Thread statisticsThread;
         private Thread channelDataThread;
 
         #endregion
-
         #region Private Variables
 
         private bool statisticsThreadRunning;
         private bool channelDataThreadRunning;
 
         #endregion
-
         #region Constructor / Destructor
 
         public Connector() {
             statisticsThread = new Thread(new ThreadStart(statisticsLoop));
             channelDataThread = new Thread(new ThreadStart(channelDataLoop));
+
+            statisticsThread.IsBackground = true;
+            channelDataThread.IsBackground = true;
 
             statisticsThreadRunning = true;
             channelDataThreadRunning = true;
@@ -53,14 +51,12 @@ namespace OpenSatelliteProject {
         }
 
         #endregion
-
         #region Properties
 
         public bool StatisticsConnected { get; set; }
         public bool DataConnected { get; set; }
 
         #endregion
-
         #region Methods
 
         public void Stop() {
@@ -88,10 +84,17 @@ namespace OpenSatelliteProject {
 
         private void statisticsLoop() {
             UIConsole.GlobalConsole.Log("Statistics Thread Started");
-            byte[] buffer = new byte[4164];
+            byte[] buffer = new byte[4165];
 
             IPHostEntry ipHostInfo = Dns.GetHostEntry("localhost");
-            IPAddress ipAddress = ipHostInfo.AddressList[0];
+            IPAddress ipAddress = new IPAddress(new byte[] { 127, 0, 0, 1 });
+            foreach (IPAddress ip in ipHostInfo.AddressList) {
+              if (ip.AddressFamily != AddressFamily.InterNetworkV6) {
+                ipAddress = ip;
+                break;
+              }
+            }
+
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, 5002);
             Socket sender = null;
             bool isConnected;
@@ -132,6 +135,7 @@ namespace OpenSatelliteProject {
                     }
 
                     sender.Shutdown(SocketShutdown.Both);
+                    sender.Disconnect(false);
                     sender.Close();
 
                 } catch (ArgumentNullException ane) {
@@ -151,6 +155,7 @@ namespace OpenSatelliteProject {
             try {
                 if (sender != null) {
                     sender.Shutdown(SocketShutdown.Both);
+                    sender.Disconnect(false);
                     sender.Close();
                 }
             } catch (Exception e) {
@@ -164,7 +169,13 @@ namespace OpenSatelliteProject {
             byte[] buffer = new byte[892];
 
             IPHostEntry ipHostInfo = Dns.GetHostEntry("localhost");
-            IPAddress ipAddress = ipHostInfo.AddressList[0];
+            IPAddress ipAddress = new IPAddress(new byte[] { 127, 0, 0, 1 });
+            foreach (IPAddress ip in ipHostInfo.AddressList) {
+              if (ip.AddressFamily != AddressFamily.InterNetworkV6) {
+                ipAddress = ip;
+                break;
+              }
+            }
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, 5001);
             Socket sender = null;
 
@@ -203,6 +214,7 @@ namespace OpenSatelliteProject {
                     }
 
                     sender.Shutdown(SocketShutdown.Both);
+                    sender.Disconnect(false);
                     sender.Close();
 
                 } catch (ArgumentNullException ane) {
@@ -222,6 +234,7 @@ namespace OpenSatelliteProject {
             try {
                 if (sender != null) {
                     sender.Shutdown(SocketShutdown.Both);
+                    sender.Disconnect(false);
                     sender.Close();
                 }
             } catch (Exception e) {
