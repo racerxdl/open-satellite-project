@@ -1,2 +1,0 @@
-Satellite Tracker
-=================
